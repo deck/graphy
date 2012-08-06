@@ -13,19 +13,19 @@
 //
 
 Graphy.util = {
-  
+ 
   apply_value_to_new_ratio: function( val, old_min, old_max, new_min, new_max, flipped ) {
     var ret;
-    
+   
     if ( old_min == old_max || new_min == new_max ) { 
       ret = 0; 
     } else {
       ret = (new_max - new_min)/(old_max-old_min) * (val - old_min);
     }
-    
+   
     return flipped ? (new_max - new_min) - ret + new_min : ret + new_min;
   },
-    
+   
   create_rect: function(rect) {
     var new_rect = { top: rect && rect.top ? rect.top : 0,
       right: rect && rect.right ? rect.right : 0,
@@ -54,15 +54,15 @@ Graphy.util = {
         return "{top:" + this.top + ", bottom:" + this.bottom + ", left:" + this.left + ", right:" + this.right + "}";
       }
     };
-    
+   
     new_rect.recalculate_nice_rect();
-    
+   
     return new_rect;
   },
-  
+ 
   function_by_name_or_function: function( name_or_function, pkg, default_function ) {
     var func;
-    
+   
     if ( name_or_function && name_or_function.constructor == Function ) {
       func = name_or_function;
     } else if ( name_or_function && name_or_function.constructor == String ) {
@@ -70,21 +70,21 @@ Graphy.util = {
     } else {
       func = default_function || null;
     }
-    
+   
     return func;
   },
-  
+ 
   nice_num: function( n, go_down ) {
     var signed = n < 0;
     n = Math.abs(n);
-    
+   
     var exponent = Math.floor( Math.log(n)/Math.LN10 );
     var frac = n/Math.pow(10,exponent);
-   
+  
     var nice_frac = 10;
     var nice_fracs = [ 0, 0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9, 1.0 ];
     var whole_num = Math.floor(frac);
-    
+   
     for ( var i = 0; i < nice_fracs.length; i++ ) {
       if ( ( go_down || signed ) && !( go_down && signed )  ) { // XOR
         if ( frac >= whole_num + nice_fracs[i] ) { nice_frac = whole_num + nice_fracs[i]; break; }
@@ -92,13 +92,13 @@ Graphy.util = {
         if ( frac <= whole_num + nice_fracs[i] ) { nice_frac = whole_num + nice_fracs[i]; break; }
       }
     }
-    
+   
     return nice_frac * Math.pow(10,exponent) * ( signed ? -1 : 1);
   },
 
   calculatePrecision: function (low, high) {
     var precision, distance = Math.abs(high - low);
-  
+ 
     if (distance == 0) precision = 1
     else {
       precision = Math.max(0, Math.ceil(Math.log(distance) / Math.log(10))); //sigfigs before decimal
@@ -106,4 +106,4 @@ Graphy.util = {
     }
     return precision;
   }
-};
+}

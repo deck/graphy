@@ -46,4 +46,4 @@ Graphy.filters = {
 
     return series;
   }
-};
+}

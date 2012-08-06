@@ -13,11 +13,11 @@
 //
 
 Graphy.formatters = {
-  
+ 
   human_date: function(val, precision) {
     var date = new Date(val);
     precision = precision || 1;
-    
+   
     if ( isNaN( date.getTime() ) ) {
       val = "";
     } else if ( precision < Graphy.interval.month && date.getHours() == 12 && date.getMinutes() == 0 ) {
@@ -42,12 +42,11 @@ Graphy.formatters = {
     } else {
       val = Graphy.formatters.months[ date.getMonth() ] + " " + date.getFullYear();
     }
-    
+   
     return val;
   },
-  
-    none: function(val, precision){ return "" },
-  
-  months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-  
-};
+ 
+  none: function(val, precision){ return "" },
+ 
+  months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] 
+}

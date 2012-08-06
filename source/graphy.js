@@ -22,17 +22,6 @@
 // You should have received a copy of the Lesser General Public License along with Graphy. If not, see 
 // <http://www.gnu.org/licenses/>.
 //
-
-//
-// Logging works in FF and Chrome. Stoopid IE.
-//
-if (!window.console) console = {};
-console.log = console.log || function() {};
-console.info = console.info || function() {};
-console.warn = console.warn || function() {};
-console.error = console.error || function() {};
-
-
 //
 // Say hello to our graphing module. 
 //
@@ -50,11 +39,12 @@ console.error = console.error || function() {};
 //   util: Common (hopefully useful) graphing functions.
 //  
 //
+
 var Graphy = {
-  
+ 
   graphs: [],
   css_is_ready: false,
-  
+ 
   //
   // Creates a graph on a canvas element according to a "spec" hash. The hash may contain the following keys:
   // 
@@ -76,10 +66,10 @@ var Graphy = {
   //
   create_graph: function(spec) {
     var self = {};
-    
+   
     // see: plot, plots, and plot_jsons for accessors
     var _plots = [];
-    
+   
     // have read/write accessors
     var _canvas,
         _y_axis_renderer, 
@@ -89,7 +79,7 @@ var Graphy = {
 		    _v_rule_label = false,
         _no_hover,
         _options = {};
-        
+       
     // have read-only accessors
     var _$canvas,
         _ctx, 
@@ -100,14 +90,12 @@ var Graphy = {
         _y_units = [],
         _value_rect_by_unit = {},
         _selected_plot_count = 0;
-    
+   
     // private vars
     var _$hoverLine,
         _hoverLine,
         _hoverLineCtx;
-        
-    console.log("Creating graphy: " + _index);
-    
+   
     //
     // gets the canvas and context and calls any spec'd functions 
     //
@@ -115,17 +103,17 @@ var Graphy = {
       if ( spec.options ) { self.options(spec.options); }
       if ( spec.canvas ) { self.canvas(spec.canvas); }
       self.no_hover(true);
-      
+     
       if ( spec.x_axis_interval ) { self.x_axis_interval(spec.x_axis_interval); }
       if ( spec.x_axis_label_formatter ) { self.x_axis_label_formatter(spec.x_axis_label_formatter); }
       if ( spec.x_axis_renderer ) { self.x_axis_renderer(spec.x_axis_renderer); }
       if ( spec.y_axis_renderer ) { self.y_axis_renderer(spec.y_axis_renderer); }
       if ( spec.v_rule_label ) { self.v_rule_label(spec.v_rule_label); }
-      
+     
       if ( spec['plot'] ) { self.plot(spec['plot']); }
       if ( spec['plots'] ) { self.plots(spec['plots']); }
       if ( spec['plot_json'] ) { self.plot_json(spec['plot_json']); }
-      
+     
       if ( _plots.length ) { self.draw(); }
     }
 
@@ -142,7 +130,7 @@ var Graphy = {
         if(this.removeHighlightPointIfExists) this.removeHighlightPointIfExists();
       });
     }
-      
+     
     //
     // draws it up if the css is all ready. if not, it waits until it can see it.
     //
@@ -158,8 +146,6 @@ var Graphy = {
             clearInterval(interval);
             Graphy.css_is_ready = true;
             drawForReal();
-          } else {
-            console.log('Graphy says the css is not ready. Trying again.');
           }
         }, 10 );
       }
@@ -182,7 +168,7 @@ var Graphy = {
         y: graphRectPixel.y + o.top
       };
     }
-    
+   
     var drawForReal = function() {
       if ( !_ctx ) { return; }
 
@@ -198,7 +184,7 @@ var Graphy = {
         _x_axis_renderer( "measure", self );        
         _y_axis_renderer( "draw", self );
         _x_axis_renderer( "draw", self );
-        
+       
         // render the plots
         var options, renderer, rendererIndexes = {},
           indexByPlot = {};
@@ -213,7 +199,7 @@ var Graphy = {
           else if(b.options.renderer == 'bar')
             return 1;
         });
-            
+           
         for (var i = 0; i < _plots.length; i++) {
           options = $.extend({}, _options, _plots[i].options);
           renderer = Graphy.util.function_by_name_or_function(options.renderer, Graphy.renderers, Graphy.renderers.plot);
@@ -222,10 +208,10 @@ var Graphy = {
           renderer(rendererIndexes[renderer], _plots[i].data, options, self);          
         }      
       }
-      
+     
       _ctx.restore();
     }
-    
+   
     //
     // accessor for canvas
     //
@@ -234,10 +220,10 @@ var Graphy = {
     //
     self.canvas = function( set_canvas ) {
       if ( set_canvas ) {
-        
+       
         var $target = $( set_canvas ).first();
         _$canvas = $target;
-        
+       
         if(!$target.is('canvas')){
           _$canvas = $target.createCanvas().find('canvas');
         } else {
@@ -316,7 +302,7 @@ var Graphy = {
               if(this.data && this.data[i]){
                 nearestPoint = this.data[i];
               }
-              
+             
               var pixel = this.fromPlotPointToDocumentPixel({x:nearestPoint[0],y:nearestPoint[1]});
               var closeEnoughToDraw = Math.abs(pixel.x - e.pageX) < 15;
 
@@ -435,10 +421,10 @@ var Graphy = {
 
         });
       }
-      
+     
       return _canvas;
     }
-    
+   
     //
     // accessor
     //
@@ -462,7 +448,7 @@ var Graphy = {
       if ( arguments.length ) { _x_axis_interval = set_x_axis_interval; }
       return _x_axis_interval;
     }
-    
+   
     //
     // accessor
     //
@@ -472,7 +458,7 @@ var Graphy = {
       }
       return _x_axis_label_formatter;
     }
-    
+   
     //
     // accessor
     //
@@ -482,7 +468,7 @@ var Graphy = {
       }
       return _x_axis_renderer;
     }
-    
+   
     //
     // accessor
     //
@@ -492,7 +478,7 @@ var Graphy = {
       }
       return _y_axis_renderer;
     }
-    
+   
     //
     // accessor
     //
@@ -500,61 +486,61 @@ var Graphy = {
       if ( arguments.length ) { _v_rule_label = set_v_rule_label; }
       return _v_rule_label;
     }
-    
+   
     //
     // read-only accessor
     //
     self.$canvas = function() {
       return _$canvas;
     }
-    
+   
     //
     // read-only accessor for the canvas' context
     //
     self.ctx = function() {
       return _ctx;
     }
-    
+   
     //
     // read-only accessor
     //
     self.index = function() {
       return _index;
     }
-    
+   
     //
     // read-only accessor
     //
     self.value_rect = function() {
       return Graphy.util.create_rect(_value_rect);
     }
-    
+   
     //
     // read-only accessor
     //
     self.value_rect_by_unit = function(key) {
       return Graphy.util.create_rect( _value_rect_by_unit[key] );
     }
-    
+   
     //
     // Checks to see if "renderer" will be used in _any_ of the plots
     //
     self.uses_renderer = function(needle_renderer) {
       var options, renderer;
       needle_renderer = Graphy.util.function_by_name_or_function( needle_renderer, Graphy.renderers, Graphy.renderers.plot );
-      
+     
       // global options
       if ( Graphy.util.function_by_name_or_function( _options.renderer, Graphy.renderers, Graphy.renderers.plot ) == needle_renderer ) { return true; }
-      
+     
       // each plot
       for ( var i = 0; i < _plots.length; i++ ) {
         renderer = Graphy.util.function_by_name_or_function( _plots[i].options.renderer, Graphy.renderers, Graphy.renderers.plot );
         if ( renderer == needle_renderer ) { return true; }
       }
-      
+     
       return false;
     }
-    
+   
     //
     // axis may be either "x" or "y". anything else will result in a combined object
     //
@@ -569,49 +555,49 @@ var Graphy = {
         return $.merge( $.merge([], _y_units), _x_units );
       }
     }
-    
+   
     //
     // read-only accessor. units array will contain an object like {label: "cm", color: "red"}
     //
     self.y_units = function() {
       return _y_units;
     }
-    
+   
     //
     // read-only accessor. units array will contain an object like {label: "cm", color: "red"}
     //
     self.x_units = function() {
       return _x_units;
     }
-    
+   
     //
     // read-only accessor
     //
     self.graph_rect = function() {
       return _graph_rect;
     }
-    
+   
     //
     // read-only accessor
     //
     self.first_plot = function() {
       return _plots[0];
     }
-    
+   
     //
     // read-only accessor
     //
     self.last_plot = function() {
       return _plots[_plots.length-1];
     }
-    
+   
     //
     // read-only accessor
     //
     self.has_selected_items = function() {
       return _selected_plot_count > 0;
     }
-    
+   
     //
     // Removes all plots and redraws (blank)
     //
@@ -624,11 +610,11 @@ var Graphy = {
       _y_units = [];
       _selected_plot_count = 0;
       self.no_hover(true);
-      
+     
       _value_rect_by_unit = {};
       self.draw();
     }
-    
+   
     //
     // Plots a data series. This is probably what you are looking for. Data can either be an
     // array series or a hash formatted { data: [[x,y]...], options: {} }. If data is not a 2d array
@@ -641,18 +627,18 @@ var Graphy = {
       }
       data = data.sort(function(a,b){ return (a[0] - b[0]); });//sort by x-axis value ascending
       options = $.extend( {}, _options, options );
-      
+     
       for ( var i = 0, len = data.length; i < len; i++ ) {
         if ( data[i].constructor != Array ) { data[i] = [ _x_axis_interval ? _x_axis_interval * i : i, data[i] ]; }
-        
+       
         var dp = data[i];
         if(dp[0] === null || dp[0] === undefined || dp[1] === null || dp[1] === undefined) continue;
 
         if ( dp[0].constructor == Date ) { dp[0] = dp[0].getTime(); }
         if ( dp[1].constructor == Date ) { dp[1] = dp[1].getTime(); }
-        
+       
         if ( options['x_offset'] ) { dp[0] += ( options['x_offset'].constructor == Date ? options['x_offset'].getTime() : options['x_offset'] ); }
-        
+       
         //
         // Find mins an maxs
         //
@@ -661,7 +647,7 @@ var Graphy = {
         } else {
           _value_rect.recalculate_with_point( dp );
         }
-        
+       
         var y_unit_option = options['unit'] || options['y_unit'];
         if ( y_unit_option ) {
           if ( !_value_rect_by_unit[y_unit_option] ) { 
@@ -671,7 +657,7 @@ var Graphy = {
             _value_rect_by_unit[y_unit_option].recalculate_with_point( dp );
           }
         }
-        
+       
         if ( options['x_unit'] ) {
           if ( !_value_rect_by_unit[options['x_unit']] ) { 
             _value_rect_by_unit[options['x_unit']] = Graphy.util.create_rect( {left: dp[0], right: dp[0], bottom: dp[1], top: dp[1]} );
@@ -680,7 +666,7 @@ var Graphy = {
             _value_rect_by_unit[options['x_unit']].recalculate_with_point( dp );
           }
         }
-        
+       
       }
 
       // Each rect width should be the same to prevent misalignment along the x-axis.
@@ -699,7 +685,7 @@ var Graphy = {
         if ( _value_rect.top < 0 ) { _value_rect.top = 0; }
         if ( _value_rect.bottom > 0 ) { _value_rect.bottom = 0; }
       }
-            
+           
       var p = this.newPlotObject({ "data": data, "options": options, graphy: self });
       p.draw = function() { self.draw(); return p; };
       p.remove = function() { return self.remove_plot(p); };
@@ -724,9 +710,9 @@ var Graphy = {
       if(!spec.no_hover && Graphy.util.function_by_name_or_function( options['renderer'], Graphy.renderers ) != Graphy.renderers.bar) {
         self.no_hover(false);
       }
-      
+     
       _plots.push( p );
-      
+     
       return p;
     }
 
@@ -786,7 +772,7 @@ var Graphy = {
           var label,
     	      x_display_point = Math.round(point[0] * 100)/100,
     	      y_display_point = Math.round(point[1] * 100)/100;
-	    
+    
           if(this.options.unit) {
             label = y_display_point + ' ' + this.options.unit + ' @ ' + Graphy.formatters.human_date(x_display_point);
           } else {
@@ -796,7 +782,7 @@ var Graphy = {
           if(this.options.dataSourceAndTypeLabel){
             label += " - " + this.options.dataSourceAndTypeLabel;
           }
-          
+         
           this.highlightedPoint = {
             point: point,
             arrowElement: $c,
@@ -806,7 +792,7 @@ var Graphy = {
                        .prependTo('body')
                        .addClass('graphy')
           }
-          
+         
           // figure out if we need to draw it on the left or not
           var $gCanvas = $(this.graphy.canvas()),
             gRight = $gCanvas.offset().left + $gCanvas.width(),
@@ -851,7 +837,7 @@ var Graphy = {
       }
       return $.extend(p, opts);
     };
-    
+   
     //
     // Remove the plot, specified by plot reference or index.
     //
@@ -865,10 +851,10 @@ var Graphy = {
         i = $.inArray(p, _plots);
       }
       // TODO: update no_hover() here. it does not appear that this function is being used.
-      
+     
       return _plots.splice(i,1)[0];
     }
-    
+   
     //
     // plots an array of plots. see plot for hash format.
     //
@@ -878,7 +864,7 @@ var Graphy = {
           self.plot(plot_array[i], options);
         }
       }
-      
+     
       return _plots;
     }
 
@@ -888,14 +874,14 @@ var Graphy = {
     self.barPlots = function(){
       return _.select(_plots, function(p){ return p.options.renderer == 'bar'; })
     }
-    
+   
     //
     //this helper returns the number of points in the plot with the most points
     //
     self.maxNumBarsInPlot = function(){
       return _.max(self.barPlots(), function(p){ return p.data.length; }).data.length
     }
-    
+   
     //
     // plots based on a json hash (single plot) or array (multiple plots). see plot for hash format.
     //
@@ -906,15 +892,15 @@ var Graphy = {
         console.warn(err, json);
         return self;
       }
-      
+     
       if ( obj ) {
         if ( obj.constructor != Array ) { obj = [obj]; }
         self.plots( obj );
       }
-      
+     
       return _plots;
     }
-    
+   
     //
     // getter/setter for max_x/y
     //
@@ -922,7 +908,7 @@ var Graphy = {
       if ( val != null ) { axis_name == 'x' ? _value_rect.right = val : _value_rect.top = val; }
       return axis_name == 'x' ? _value_rect.right : _value_rect.top;
     }
-    
+   
     //
     // getter/setter for min_x/y
     //
@@ -932,11 +918,8 @@ var Graphy = {
       }
       return axis_name == 'x' ? _value_rect.left : _value_rect.bottom;
     }
-    
+   
     init(spec);
     return self;
   }
-  
-};
-
-
+}
