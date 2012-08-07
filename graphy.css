@@ -1,0 +1,73 @@
+/* Do not mess with this rule. It is how we determine if the css is correctly loaded. */
+.graphy_css_loaded {
+  position: absolute;
+}
+
+.vertical_text {
+  -webkit-transform: rotate(-90deg);
+  -webkit-transform-origin: top left;
+  -moz-transform: rotate(-90deg);
+  -moz-transform-origin: top left;
+  -o-transform: rotate(-90deg);
+  -o-transform-origin: top left;
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+}
+
+.graphy_canvas {
+  background-color: #fff;
+}
+
+.graphy_point_label {
+  background-color: gray;
+  position: absolute;
+  font-weight: bold;
+  font-size: 10px;
+  font-family: Arial;
+  color: #fff;
+  padding: 0 5px;
+  margin: 0;
+  white-space: nowrap;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+}
+
+.graphy_bar_label, .graphy_v_rule_label {
+  font-size: 9px !important;
+  text-shadow: 
+    -1px -1px 0 white, 
+    1px -1px 0 white, 
+    -1px 1px 0 white, 
+    1px 1px 0 white,
+    1px 0 0 white, 
+    -1px 0 0 white,
+    0 1px 0 white,
+    0 -1px 0 white;
+}
+
+.graphy_axis_label {
+  position: absolute;
+  font-family: Arial;
+  font-size: 11px;
+  line-height: 1em;
+  font-weight: bold;
+  color: #666;
+  padding: 0;
+  margin: 0;
+}
+
+.graphy_axis_label > .lite {
+  color: #ccc;
+  font-weight: normal;
+}
+
+.graphy_axis_unit_label {
+}
+
+.graphy_axis_clean_y_value_label {
+  font-size: 9px;
+  font-weight: normal;
+}
+
+.graphy_axis_clean_x_value_label, .graphy_axis_line_x_value_label, .graphy_axis_line_y_value_label  {
+  color: #aaa;
+}
