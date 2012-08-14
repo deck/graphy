@@ -1,0 +1,21 @@
+<html>
+  <head>
+    <title>Example Test Suite</title>
+    <link rel="stylesheet" href="nodeunit/nodeunit.css" type="text/css" />
+    <script src="nodeunit/nodeunit.js"></script>
+		<script src="nodeunit/nodeunit-extras.js"></script>
+    <script src="suite1.js"></script>
+		<script src="suite2.js"></script>
+		<script src="suite3.js"></script>
+  </head>
+  <body>
+    <h1 id="nodeunit-header">Example Test Suite</h1>
+    <script>
+			nodeunit.go({
+				'suite uno': suite1,
+        'suite zwei': suite2,
+        'suite three': suite3
+			});
+    </script>
+  </body>
+</html>
