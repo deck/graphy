@@ -42,6 +42,7 @@
 
 var Graphy = {
  
+	version: "1.2012.08.15",
   graphs: [],
   css_is_ready: false,
  
