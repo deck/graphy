@@ -369,7 +369,7 @@ Graphy.renderers = {
       ctx.restore();
     },
    
-    label: function(val, x, y, graph, style_name, formatter, align, color, opacity) {
+    label: function(val, x, y, graph, style_name, formatter, align, color, opacity) {	
       var $canvas = graph.$canvas();
       var left = Math.round($canvas.offset().left + x);
       var top = Math.round($canvas.offset().top + y);
@@ -436,7 +436,7 @@ Graphy.renderers = {
       }
     },
    
-    x_value_labels: function(number_of_labels, x_offset, y_offset, style_name, align, graph) {
+    x_value_labels: function(number_of_labels, x_offset, y_offset, style_name, align, graph) {	
       var $canvas = graph.$canvas(),
           value_rect = graph.value_rect().nice_rect,
           graph_rect = graph.graph_rect(),
@@ -450,7 +450,7 @@ Graphy.renderers = {
       var bigger_interval = Graphy.interval.bigger_interval(x_axis_interval);
       var left = x_axis_label_formatter == Graphy.formatters.human_date ?  Graphy.interval.floor(value_rect.left, bigger_interval).getTime() : value_rect.left;
       var labelCount = 0;
-     
+
       if ( x_axis_interval > Graphy.interval.hour && x_axis_label_formatter == Graphy.formatters.human_date ) {
         // step by nice dates
         var step_increment = Math.ceil(((value_rect.right - value_rect.left)/x_axis_interval)/number_of_labels);
@@ -515,7 +515,7 @@ Graphy.renderers = {
           }
         }
       }
-     
+
       // actually draw them
       var last_x = -1000;
       _.each( labels_to_draw, function(label) {
