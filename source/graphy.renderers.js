@@ -445,6 +445,10 @@ Graphy.renderers = {
           align = align || "center",
           round_v, labels_to_draw = {};
 
+      if (!value_rect.width() > 0) {
+        return;
+      }
+
       if ( !x_axis_interval || x_axis_interval < Graphy.interval.hour ) { x_axis_interval = Graphy.interval.hour; }
 
       var bigger_interval = Graphy.interval.bigger_interval(x_axis_interval);
@@ -497,7 +501,10 @@ Graphy.renderers = {
         var precision = Graphy.util.calculatePrecision(value_rect.left, value_rect.right);
 
         // fill in (1/2, 1/4, 1/8...) until out of labels       
-        for (var jump = bigger_interval; labelCount*2-1 < number_of_labels && jump > 0; jump /= 2) {
+        for ( var jump = bigger_interval;
+              // protect against jump getting so small that left + jump == left
+              labelCount*2-1 < number_of_labels && left + jump > left;
+              jump /= 2) {
           for ( n = left + jump; 
                 n <= value_rect.right; 
                 n += jump ) {
