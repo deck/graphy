@@ -19,10 +19,16 @@
 			options: { x_unit: 'beans', y_unit: 'tacos' }
 		});
 		
+		var randomArray = function(length) {
+			a = [];
+			for (var i=0; i < length; i++) { 
+				a.push([Math.random() * 10, Math.random() * 10])
+			}
+			return a;
+		}
+		
 		g.plot(
-			[
-				[3, 1], [4, 2], [2, 0], [5, 5], [3, 1], [4, 2], [5, 1], [6, 5]
-			], 
+			randomArray(50), 
 			{ 
 				renderer: 'plot',
 				color: 'purple'
@@ -30,9 +36,7 @@
 		);
 		
 		g.plot(
-			[
-				[1, 4], [3, 6], [4, 0], [3, 4], [5, 3], [4, 4], [8, 2], [4, 3]
-			], 
+			randomArray(50), 
 			{ 
 				renderer: 'plot',
 				color: 'orange'

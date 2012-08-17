@@ -1,3 +1,4 @@
+define(function() {
 //
 //
 //    .oooooo.                                  oooo                    
@@ -1774,3 +1775,6 @@ Graphy.renderers = {
     }  
   }
 }
+
+return Graphy;
+});
