@@ -65,7 +65,7 @@ Graphy.renderers = {
         graph_rect = graph.graph_rect(),
         x,
         y,
-        rgb = Rico.Color.create(options.color || "gray").rgb,
+        rgb = Graphy.Color.create(options.color || "gray").rgb,
         alpha = !graph.has_selected_items() || options['selected'] ? 1 : 0.2;
    
     ctx.save();
@@ -100,12 +100,8 @@ Graphy.renderers = {
 
     var precision = Graphy.util.calculatePrecision(value_rect.bottom, value_rect.top)
 
-    if ( Rico && Rico.Color ) {
-      bottom_rgb = Rico.Color.create(top_color).darken(.1).rgb;
-      top_rgb = Rico.Color.create(top_color).brighten(.05).rgb;
-    } else {
-      console.warn("Bar graphs look better when you include Rico.Color with your js.")
-    }
+    bottom_rgb = Graphy.Color.create(top_color).darken(.1).rgb;
+    top_rgb = Graphy.Color.create(top_color).brighten(.05).rgb;
 
     ctx.save();
     ctx.beginPath();
