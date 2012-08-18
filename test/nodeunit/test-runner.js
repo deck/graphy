@@ -14,7 +14,7 @@ page.onConsoleMessage = function (msg) {
 	}
 }
 
-page.open('http://localhost:8374/test/test.html', function (status) {
+page.open('http://localhost:8374/test/sanity/run.html', function (status) {
 	if (status == "fail") { 
 		console.log("Status: " + status);
 		phantom.exit(8); 
