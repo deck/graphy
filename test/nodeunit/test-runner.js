@@ -4,8 +4,8 @@ var page = require('webpage').create();
 page.settings.userAgent = 'phantom';
 
 var runners = [
-	{ url: 'http://localhost:8374/test/sanity/run.html', title: 'Sanity Tests' },
-	{ url: 'http://localhost:8374/test/regression/run.html', title: 'Regression Tests' }
+	{ url: 'http://localhost:7357/test/sanity/run.html', title: 'Sanity Tests' },
+	{ url: 'http://localhost:7357/test/regression/run.html', title: 'Regression Tests' }
 ]
 
 var openNextRunner = function() {
