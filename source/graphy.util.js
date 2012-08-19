@@ -14,86 +14,86 @@
 
 Graphy.util = {
  
-  apply_value_to_new_ratio: function( val, old_min, old_max, new_min, new_max, flipped ) {
+  applyValueToNewRatio: function( val, oldMin, oldMax, newMin, newMax, flipped ) {
     var ret;
    
-    if ( old_min == old_max || new_min == new_max ) { 
+    if ( oldMin == oldMax || newMin == newMax ) { 
       ret = 0; 
     } else {
-      ret = (new_max - new_min)/(old_max-old_min) * (val - old_min);
+      ret = (newMax - newMin)/(oldMax-oldMin) * (val - oldMin);
     }
    
-    return flipped ? (new_max - new_min) - ret + new_min : ret + new_min;
+    return flipped ? (newMax - newMin) - ret + newMin : ret + newMin;
   },
    
-  create_rect: function(rect) {
-    var new_rect = { top: rect && rect.top ? rect.top : 0,
+  createRect: function(rect) {
+    var newRect = { top: rect && rect.top ? rect.top : 0,
       right: rect && rect.right ? rect.right : 0,
       bottom: rect && rect.bottom ? rect.bottom : 0,
       left: rect && rect.left ? rect.left : 0,
       height: function() { return Math.abs(this.bottom - this.top) },
       width: function() { return Math.abs(this.right - this.left) },
-      nice_rect: false,
-      recalculate_with_point: function(pt) { // param is 2 dimensional array [x,y]
-        if ( pt[0] < new_rect.left ) { new_rect.left = pt[0]; }
-        if ( pt[0] > new_rect.right ) { new_rect.right = pt[0]; }
-        if ( pt[1] < new_rect.bottom ) { new_rect.bottom = pt[1]; }
-        if ( pt[1] > new_rect.top ) { new_rect.top = pt[1]; }
-        new_rect.recalculate_nice_rect();
+      niceRect: false,
+      recalculateWithPoint: function(pt) { // param is 2 dimensional array [x,y]
+        if ( pt[0] < newRect.left ) { newRect.left = pt[0]; }
+        if ( pt[0] > newRect.right ) { newRect.right = pt[0]; }
+        if ( pt[1] < newRect.bottom ) { newRect.bottom = pt[1]; }
+        if ( pt[1] > newRect.top ) { newRect.top = pt[1]; }
+        newRect.recalculateNicePoint();
       },
-      recalculate_nice_rect: function() {
-        new_rect.nice_rect = $.extend({}, new_rect);
-        new_rect.nice_rect.bottom = Graphy.util.nice_num(new_rect.bottom, true);
-        new_rect.nice_rect.top = Graphy.util.nice_num(new_rect.top);
+      recalculateNicePoint: function() {
+        newRect.niceRect = $.extend({}, newRect);
+        newRect.niceRect.bottom = Graphy.util.niceNum(newRect.bottom, true);
+        newRect.niceRect.top = Graphy.util.niceNum(newRect.top);
 
-        if(new_rect.nice_rect.top == new_rect.nice_rect.bottom){
- 	  new_rect.nice_rect.top = new_rect.nice_rect.bottom + 1;
+        if(newRect.niceRect.top == newRect.niceRect.bottom){
+ 	  newRect.niceRect.top = newRect.niceRect.bottom + 1;
 	}  
       },
-      to_s: function() {
+      toString: function() {
         return "{top:" + this.top + ", bottom:" + this.bottom + ", left:" + this.left + ", right:" + this.right + "}";
       }
     };
    
-    new_rect.recalculate_nice_rect();
+    newRect.recalculateNicePoint();
    
-    return new_rect;
+    return newRect;
   },
  
-  function_by_name_or_function: function( name_or_function, pkg, default_function ) {
+  functionByNameOrFunction: function( nameOrFunction, pkg, defaultFunction ) {
     var func;
    
-    if ( name_or_function && name_or_function.constructor == Function ) {
-      func = name_or_function;
-    } else if ( name_or_function && name_or_function.constructor == String ) {
-      func = pkg[name_or_function];
+    if ( nameOrFunction && nameOrFunction.constructor == Function ) {
+      func = nameOrFunction;
+    } else if ( nameOrFunction && nameOrFunction.constructor == String ) {
+      func = pkg[nameOrFunction];
     } else {
-      func = default_function || null;
+      func = defaultFunction || null;
     }
    
     return func;
   },
  
-  nice_num: function( n, go_down ) {
+  niceNum: function( n, goDown ) {
     var signed = n < 0;
     n = Math.abs(n);
    
     var exponent = Math.floor( Math.log(n)/Math.LN10 );
     var frac = n/Math.pow(10,exponent);
   
-    var nice_frac = 10;
-    var nice_fracs = [ 0, 0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9, 1.0 ];
-    var whole_num = Math.floor(frac);
+    var niceFrac = 10;
+    var niceFracs = [ 0, 0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9, 1.0 ];
+    var wholeNum = Math.floor(frac);
    
-    for ( var i = 0; i < nice_fracs.length; i++ ) {
-      if ( ( go_down || signed ) && !( go_down && signed )  ) { // XOR
-        if ( frac >= whole_num + nice_fracs[i] ) { nice_frac = whole_num + nice_fracs[i]; break; }
+    for ( var i = 0; i < niceFracs.length; i++ ) {
+      if ( ( goDown || signed ) && !( goDown && signed )  ) { // XOR
+        if ( frac >= wholeNum + niceFracs[i] ) { niceFrac = wholeNum + niceFracs[i]; break; }
       } else {
-        if ( frac <= whole_num + nice_fracs[i] ) { nice_frac = whole_num + nice_fracs[i]; break; }
+        if ( frac <= wholeNum + niceFracs[i] ) { niceFrac = wholeNum + niceFracs[i]; break; }
       }
     }
    
-    return nice_frac * Math.pow(10,exponent) * ( signed ? -1 : 1);
+    return niceFrac * Math.pow(10,exponent) * ( signed ? -1 : 1);
   },
 
   calculatePrecision: function (low, high) {

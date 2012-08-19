@@ -27,7 +27,7 @@ define(function() {
 // Say hello to our graphing module. 
 //
 // It has one instantiating function: 
-//   create_graph: This creates a graph on an element and provides you with several functions to work with it.
+//   createGraph: This creates a graph on an element and provides you with several functions to work with it.
 // and one array:
 //   graphs: []
 //
@@ -58,15 +58,15 @@ var Graphy = {
   // plot_json: Calls self.plot_json with value as parameter.
   // options: Sets the default style information for plots. Plots may override this. These are renderer
   //        specific. Example: {"width": 2, "color": "red", "unit": "oxen/m³"}
-  // x_axis_interval: Specify a fixed interval. See Graphy.interval.
-  // x_axis_label_formatter: Function or string name of function to format label text. See Graphy.formatters.
-  // x_axis_renderer: Function or string name of function to render x axis. See Graphy.renderers.axis.
-  //                  (default: "clean_x")
-  // y_axis_renderer: Function or string name of function to render y axis. See Graphy.renderers.axis.
-  //                  (default: "clean_y")
+  // xAxisInterval: Specify a fixed interval. See Graphy.interval.
+  // xAxisLabelFormatter: Function or string name of function to format label text. See Graphy.formatters.
+  // xAxisRenderer: Function or string name of function to render x axis. See Graphy.renderers.axis.
+  //                  (default: "cleanX")
+  // yAxisRenderer: Function or string name of function to render y axis. See Graphy.renderers.axis.
+  //                  (default: "cleanY")
   //
   //
-  create_graph: function(spec) {
+  createGraph: function(spec) {
     var self = {};
 
     // see: plot, plots, and plot_jsons for accessors
@@ -74,11 +74,11 @@ var Graphy = {
    
     // have read/write accessors
     var _canvas,
-        _y_axis_renderer, 
-        _x_axis_renderer, 
-        _x_axis_label_formatter, 
-        _x_axis_interval,
-		    _v_rule_label = false,
+        _yAxisRenderer, 
+        _xAxisRenderer, 
+        _xAxisLabelFormatter, 
+        _xAxisInterval,
+		    _vRuleLabel = false,
         _no_hover,
         _options = {};
        
@@ -86,12 +86,12 @@ var Graphy = {
     var _$canvas,
         _ctx, 
         _index = Graphy.graphs.push(self) - 1,
-        _value_rect = false,
-        _graph_rect = false,
-        _x_units = [],
-        _y_units = [],
-        _value_rect_by_unit = {},
-        _selected_plot_count = 0;
+        _valueRect = false,
+        _graphRect = false,
+        _xUnits = [],
+        _yUnits = [],
+        _valueRectByUnit = {},
+        selectedPlotCount = 0;
    
     // private vars
     var _$hoverLine,
@@ -106,11 +106,11 @@ var Graphy = {
       if ( spec.canvas ) { self.canvas(spec.canvas); }
       self.no_hover(true);
      
-      if ( spec.x_axis_interval ) { self.x_axis_interval(spec.x_axis_interval); }
-      if ( spec.x_axis_label_formatter ) { self.x_axis_label_formatter(spec.x_axis_label_formatter); }
-      if ( spec.x_axis_renderer ) { self.x_axis_renderer(spec.x_axis_renderer); }
-      if ( spec.y_axis_renderer ) { self.y_axis_renderer(spec.y_axis_renderer); }
-      if ( spec.v_rule_label ) { self.v_rule_label(spec.v_rule_label); }
+      if ( spec.xAxisInterval ) { self.xAxisInterval(spec.xAxisInterval); }
+      if ( spec.xAxisLabelFormatter ) { self.xAxisLabelFormatter(spec.xAxisLabelFormatter); }
+      if ( spec.xAxisRenderer ) { self.xAxisRenderer(spec.xAxisRenderer); }
+      if ( spec.yAxisRenderer ) { self.yAxisRenderer(spec.yAxisRenderer); }
+      if ( spec.vRuleLabel ) { self.vRuleLabel(spec.vRuleLabel); }
      
       if ( spec['plot'] ) { self.plot(spec['plot']); }
       if ( spec['plots'] ) { self.plots(spec['plots']); }
@@ -180,12 +180,12 @@ var Graphy = {
 
       if (_plots.length > 0) {        
         // draw the axis (order is important here)
-        if ( !_y_axis_renderer ) { _y_axis_renderer = Graphy.renderers.axis.clean_y; }
-        if ( !_x_axis_renderer ) { _x_axis_renderer = Graphy.renderers.axis.clean_x; }
-        _y_axis_renderer( "measure", self );
-        _x_axis_renderer( "measure", self );        
-        _y_axis_renderer( "draw", self );
-        _x_axis_renderer( "draw", self );
+        if ( !_yAxisRenderer ) { _yAxisRenderer = Graphy.renderers.axis.cleanY; }
+        if ( !_xAxisRenderer ) { _xAxisRenderer = Graphy.renderers.axis.cleanX; }
+        _yAxisRenderer( "measure", self );
+        _xAxisRenderer( "measure", self );        
+        _yAxisRenderer( "draw", self );
+        _xAxisRenderer( "draw", self );
        
         // render the plots
         var options, renderer, rendererIndexes = {},
@@ -204,7 +204,7 @@ var Graphy = {
            
         for (var i = 0; i < _plots.length; i++) {
           options = $.extend({}, _options, _plots[i].options);
-          renderer = Graphy.util.function_by_name_or_function(options.renderer, Graphy.renderers, Graphy.renderers.plot);
+          renderer = Graphy.util.functionByNameOrFunction(options.renderer, Graphy.renderers, Graphy.renderers.plot);
           if (rendererIndexes[renderer] == undefined) rendererIndexes[renderer] = 0;
           rendererIndexes[renderer] += 1;
           renderer(rendererIndexes[renderer], _plots[i].data, options, self);          
@@ -239,12 +239,12 @@ var Graphy = {
         _$canvas.addClass("graphy_canvas");
         _$canvas.data( { graph: self } );
 
-        // get the canvas context and set the graph_rect initial size
+        // get the canvas context and set the graphRect initial size
         if (!_canvas.getContext) { console.warn("No canvas context found."); return; }
         _ctx = _canvas.getContext('2d');
-        _graph_rect = Graphy.util.create_rect();
-        _graph_rect.right = _canvas.width - 2;
-        _graph_rect.bottom = _canvas.height;
+        _graphRect = Graphy.util.createRect();
+        _graphRect.right = _canvas.width - 2;
+        _graphRect.bottom = _canvas.height;
 
         // each graph needs to watch mouse movement to check if cursor enters or leaves graph area
         // mouseover and mouseout do not work because the hover line triggers these events continually since the mouse is over that, not the graph area
@@ -255,10 +255,10 @@ var Graphy = {
           }
           var o = _$canvas.offset();
           // check if cursor is inside graph area
-          if(e.pageX > (o.left + _graph_rect.left) && e.pageX < (o.left + _graph_rect.right) && e.pageY > (o.top + _graph_rect.top) && e.pageY < (o.top + _$canvas.height())) {
+          if(e.pageX > (o.left + _graphRect.left) && e.pageX < (o.left + _graphRect.right) && e.pageY > (o.top + _graphRect.top) && e.pageY < (o.top + _$canvas.height())) {
             // draw the hoverline if it does not exist
             if(!_hoverLine) {
-              _$hoverLine = $.createCanvas(2, _graph_rect.bottom).css('position', 'absolute').css('z-index', 1500),
+              _$hoverLine = $.createCanvas(2, _graphRect.bottom).css('position', 'absolute').css('z-index', 1500),
               _$hoverLine.prependTo('body').addClass('graphy');
               _hoverLine = _$hoverLine.get(0);
               _hoverLineCtx = _hoverLine.getContext('2d');
@@ -308,7 +308,7 @@ var Graphy = {
               var pixel = this.fromPlotPointToDocumentPixel({x:nearestPoint[0],y:nearestPoint[1]});
               var closeEnoughToDraw = Math.abs(pixel.x - e.pageX) < 15;
 
-              if(closeEnoughToDraw && this.options.renderer != 'bar' && (!this.graphy.has_selected_items() || this.options.selected)) {
+              if(closeEnoughToDraw && this.options.renderer != 'bar' && (!this.graphy.hasSelectedItems() || this.options.selected)) {
                 toHighlight.push({plot: this, point: nearestPoint, pixel: pixel});
               } else {
                 this.removeHighlightPointIfExists();
@@ -446,47 +446,47 @@ var Graphy = {
     //
     // accessor
     //
-    self.x_axis_interval = function( set_x_axis_interval ) {
-      if ( arguments.length ) { _x_axis_interval = set_x_axis_interval; }
-      return _x_axis_interval;
+    self.xAxisInterval = function( set_xAxisInterval ) {
+      if ( arguments.length ) { _xAxisInterval = set_xAxisInterval; }
+      return _xAxisInterval;
     }
    
     //
     // accessor
     //
-    self.x_axis_label_formatter = function( set_x_axis_label_formatter ) {
+    self.xAxisLabelFormatter = function( set_xAxisLabelFormatter ) {
       if ( arguments.length ) { 
-        _x_axis_label_formatter = Graphy.util.function_by_name_or_function( set_x_axis_label_formatter, Graphy.formatters ); 
+        _xAxisLabelFormatter = Graphy.util.functionByNameOrFunction( set_xAxisLabelFormatter, Graphy.formatters ); 
       }
-      return _x_axis_label_formatter;
+      return _xAxisLabelFormatter;
     }
    
     //
     // accessor
     //
-    self.x_axis_renderer = function( set_x_axis_renderer ) {
+    self.xAxisRenderer = function( set_xAxisRenderer ) {
       if ( arguments.length ) {
-        _x_axis_renderer = Graphy.util.function_by_name_or_function( set_x_axis_renderer, Graphy.renderers.axis ); 
+        _xAxisRenderer = Graphy.util.functionByNameOrFunction( set_xAxisRenderer, Graphy.renderers.axis ); 
       }
-      return _x_axis_renderer;
+      return _xAxisRenderer;
     }
    
     //
     // accessor
     //
-    self.y_axis_renderer = function( set_y_axis_renderer ) {
+    self.yAxisRenderer = function( set_yAxisRenderer ) {
       if ( arguments.length ) {
-        _y_axis_renderer = Graphy.util.function_by_name_or_function( set_y_axis_renderer, Graphy.renderers.axis );
+        _yAxisRenderer = Graphy.util.functionByNameOrFunction( set_yAxisRenderer, Graphy.renderers.axis );
       }
-      return _y_axis_renderer;
+      return _yAxisRenderer;
     }
    
     //
     // accessor
     //
-    self.v_rule_label = function( set_v_rule_label ) {
-      if ( arguments.length ) { _v_rule_label = set_v_rule_label; }
-      return _v_rule_label;
+    self.vRuleLabel = function( set_vRuleLabel ) {
+      if ( arguments.length ) { _vRuleLabel = set_vRuleLabel; }
+      return _vRuleLabel;
     }
    
     //
@@ -513,30 +513,30 @@ var Graphy = {
     //
     // read-only accessor
     //
-    self.value_rect = function() {
-      return Graphy.util.create_rect(_value_rect);
+    self.valueRect = function() {
+      return Graphy.util.createRect(_valueRect);
     }
    
     //
     // read-only accessor
     //
-    self.value_rect_by_unit = function(key) {
-      return Graphy.util.create_rect( _value_rect_by_unit[key] );
+    self.valueRectByUnit = function(key) {
+      return Graphy.util.createRect( _valueRectByUnit[key] );
     }
    
     //
     // Checks to see if "renderer" will be used in _any_ of the plots
     //
-    self.uses_renderer = function(needle_renderer) {
+    self.usesRenderer = function(needle_renderer) {
       var options, renderer;
-      needle_renderer = Graphy.util.function_by_name_or_function( needle_renderer, Graphy.renderers, Graphy.renderers.plot );
+      needle_renderer = Graphy.util.functionByNameOrFunction( needle_renderer, Graphy.renderers, Graphy.renderers.plot );
      
       // global options
-      if ( Graphy.util.function_by_name_or_function( _options.renderer, Graphy.renderers, Graphy.renderers.plot ) == needle_renderer ) { return true; }
+      if ( Graphy.util.functionByNameOrFunction( _options.renderer, Graphy.renderers, Graphy.renderers.plot ) == needle_renderer ) { return true; }
      
       // each plot
       for ( var i = 0; i < _plots.length; i++ ) {
-        renderer = Graphy.util.function_by_name_or_function( _plots[i].options.renderer, Graphy.renderers, Graphy.renderers.plot );
+        renderer = Graphy.util.functionByNameOrFunction( _plots[i].options.renderer, Graphy.renderers, Graphy.renderers.plot );
         if ( renderer == needle_renderer ) { return true; }
       }
      
@@ -550,54 +550,54 @@ var Graphy = {
     //
     self.units = function(axis) {
       if (axis == "x") {
-        return _x_units;
+        return _xUnits;
       } else if (axis=="y") {
-        return _y_units;
+        return _yUnits;
       } else {
-        return $.merge( $.merge([], _y_units), _x_units );
+        return $.merge( $.merge([], _yUnits), _xUnits );
       }
     }
    
     //
     // read-only accessor. units array will contain an object like {label: "cm", color: "red"}
     //
-    self.y_units = function() {
-      return _y_units;
+    self.yUnits = function() {
+      return _yUnits;
     }
    
     //
     // read-only accessor. units array will contain an object like {label: "cm", color: "red"}
     //
-    self.x_units = function() {
-      return _x_units;
+    self.xUnits = function() {
+      return _xUnits;
     }
    
     //
     // read-only accessor
     //
-    self.graph_rect = function() {
-      return _graph_rect;
+    self.graphRect = function() {
+      return _graphRect;
     }
    
     //
     // read-only accessor
     //
-    self.first_plot = function() {
+    self.firstPlot = function() {
       return _plots[0];
     }
    
     //
     // read-only accessor
     //
-    self.last_plot = function() {
+    self.lastPlot = function() {
       return _plots[_plots.length-1];
     }
    
     //
     // read-only accessor
     //
-    self.has_selected_items = function() {
-      return _selected_plot_count > 0;
+    self.hasSelectedItems = function() {
+      return selectedPlotCount > 0;
     }
    
     //
@@ -607,13 +607,13 @@ var Graphy = {
       self.removeHighlightPoints();     	
 
       _plots = [];
-      _value_rect = false;
-      _x_units = [];
-      _y_units = [];
-      _selected_plot_count = 0;
+      _valueRect = false;
+      _xUnits = [];
+      _yUnits = [];
+      selectedPlotCount = 0;
       self.no_hover(true);
      
-      _value_rect_by_unit = {};
+      _valueRectByUnit = {};
       self.draw();
     }
    
@@ -631,7 +631,7 @@ var Graphy = {
       options = $.extend( {}, _options, options );
      
       for ( var i = 0, len = data.length; i < len; i++ ) {
-        if ( data[i].constructor != Array ) { data[i] = [ _x_axis_interval ? _x_axis_interval * i : i, data[i] ]; }
+        if ( data[i].constructor != Array ) { data[i] = [ _xAxisInterval ? _xAxisInterval * i : i, data[i] ]; }
        
         var dp = data[i];
         if(dp[0] === null || dp[0] === undefined || dp[1] === null || dp[1] === undefined) continue;
@@ -639,62 +639,62 @@ var Graphy = {
         if ( dp[0].constructor == Date ) { dp[0] = dp[0].getTime(); }
         if ( dp[1].constructor == Date ) { dp[1] = dp[1].getTime(); }
        
-        if ( options['x_offset'] ) { dp[0] += ( options['x_offset'].constructor == Date ? options['x_offset'].getTime() : options['x_offset'] ); }
+        if ( options['xOffset'] ) { dp[0] += ( options['xOffset'].constructor == Date ? options['xOffset'].getTime() : options['xOffset'] ); }
        
         //
         // Find mins an maxs
         //
-        if ( !_value_rect ) {
-          _value_rect = Graphy.util.create_rect( {left: dp[0], right: dp[0], bottom: dp[1], top: dp[1]} );
+        if ( !_valueRect ) {
+          _valueRect = Graphy.util.createRect( {left: dp[0], right: dp[0], bottom: dp[1], top: dp[1]} );
         } else {
-          _value_rect.recalculate_with_point( dp );
+          _valueRect.recalculateWithPoint( dp );
         }
        
-        var y_unit_option = options['unit'] || options['y_unit'];
-        if ( y_unit_option ) {
-          if ( !_value_rect_by_unit[y_unit_option] ) { 
-            _value_rect_by_unit[y_unit_option] = Graphy.util.create_rect( {left: dp[0], right: dp[0], bottom: dp[1], top: dp[1]} );
-            _y_units.push( {"label": y_unit_option, "color": options['color']} );
+        var yUnitOption = options['unit'] || options['yUnit'];
+        if ( yUnitOption ) {
+          if ( !_valueRectByUnit[yUnitOption] ) { 
+            _valueRectByUnit[yUnitOption] = Graphy.util.createRect( {left: dp[0], right: dp[0], bottom: dp[1], top: dp[1]} );
+            _yUnits.push( {"label": yUnitOption, "color": options['color']} );
           } else {
-            _value_rect_by_unit[y_unit_option].recalculate_with_point( dp );
+            _valueRectByUnit[yUnitOption].recalculateWithPoint( dp );
           }
         }
        
-        if ( options['x_unit'] ) {
-          if ( !_value_rect_by_unit[options['x_unit']] ) { 
-            _value_rect_by_unit[options['x_unit']] = Graphy.util.create_rect( {left: dp[0], right: dp[0], bottom: dp[1], top: dp[1]} );
-            _x_units.push( {"label": options['x_unit'], "color": options['color']} );
+        if ( options['xUnit'] ) {
+          if ( !_valueRectByUnit[options['xUnit']] ) { 
+            _valueRectByUnit[options['xUnit']] = Graphy.util.createRect( {left: dp[0], right: dp[0], bottom: dp[1], top: dp[1]} );
+            _xUnits.push( {"label": options['xUnit'], "color": options['color']} );
           } else {
-            _value_rect_by_unit[options['x_unit']].recalculate_with_point( dp );
+            _valueRectByUnit[options['xUnit']].recalculateWithPoint( dp );
           }
         }
        
       }
 
       // Each rect width should be the same to prevent misalignment along the x-axis.
-      if(_.size(_value_rect_by_unit)) {
-        var leftMost = _.min(_value_rect_by_unit, function(rect){ return rect.left }).left;
-        var rightMost = _.max(_value_rect_by_unit, function(rect){ return rect.right }).right;
-        _.each(_value_rect_by_unit, function(rect){
+      if(_.size(_valueRectByUnit)) {
+        var leftMost = _.min(_valueRectByUnit, function(rect){ return rect.left }).left;
+        var rightMost = _.max(_valueRectByUnit, function(rect){ return rect.right }).right;
+        _.each(_valueRectByUnit, function(rect){
           rect.left = leftMost;
           rect.right = rightMost;
         });
       }
 
-      if ( options['force_zero'] || Graphy.util.function_by_name_or_function( options['renderer'], Graphy.renderers ) == Graphy.renderers.bar  ) { // merged options
-        if ( _value_rect_by_unit[y_unit_option].top < 0 ) { _value_rect_by_unit[y_unit_option].top = 0; }
-        if ( _value_rect_by_unit[y_unit_option].bottom > 0 ) { _value_rect_by_unit[y_unit_option].bottom = 0; }
-        if ( _value_rect.top < 0 ) { _value_rect.top = 0; }
-        if ( _value_rect.bottom > 0 ) { _value_rect.bottom = 0; }
+      if ( options['force_zero'] || Graphy.util.functionByNameOrFunction( options['renderer'], Graphy.renderers ) == Graphy.renderers.bar  ) { // merged options
+        if ( _valueRectByUnit[yUnitOption].top < 0 ) { _valueRectByUnit[yUnitOption].top = 0; }
+        if ( _valueRectByUnit[yUnitOption].bottom > 0 ) { _valueRectByUnit[yUnitOption].bottom = 0; }
+        if ( _valueRect.top < 0 ) { _valueRect.top = 0; }
+        if ( _valueRect.bottom > 0 ) { _valueRect.bottom = 0; }
       }
            
       var p = this.newPlotObject({ "data": data, "options": options, graphy: self });
       p.draw = function() { self.draw(); return p; };
-      p.remove = function() { return self.remove_plot(p); };
+      p.remove = function() { return self.removePlot(p); };
       p.select = function() { 
         if ( !p.options['selected'] ) {
           p.options['selected'] = true; 
-          _selected_plot_count++;
+          selectedPlotCount++;
         }
         self.draw(); 
         return p; 
@@ -702,14 +702,14 @@ var Graphy = {
       p.unselect = p.deselect = function() { 
         if ( p.options['selected'] ) {
           p.options['selected'] = false; 
-          _selected_plot_count--;
+          selectedPlotCount--;
         }
         self.draw(); 
         return p; 
       };
 
       // only enable hover if a non-bar graph has been added.  hover is disabled when the graph is cleared and this is where it eventually gets enabled.
-      if(!spec.no_hover && Graphy.util.function_by_name_or_function( options['renderer'], Graphy.renderers ) != Graphy.renderers.bar) {
+      if(!spec.no_hover && Graphy.util.functionByNameOrFunction( options['renderer'], Graphy.renderers ) != Graphy.renderers.bar) {
         self.no_hover(false);
       }
      
@@ -722,21 +722,21 @@ var Graphy = {
     self.newPlotObject = function(opts) {
       var p = {
         valueRect: function() {
-          return this.options['unit'] ? this.graphy.value_rect_by_unit(this.options['unit']).nice_rect : this.graphy.value_rect().nice_rect;
+          return this.options['unit'] ? this.graphy.valueRectByUnit(this.options['unit']).niceRect : this.graphy.valueRect().niceRect;
         },
         fromDocumentPixelToPlotPoint: function(documentPixel) {
           var graphRectPixel = this.graphy.fromDocumentPixelToGraphRectPixel(documentPixel);
 
-          var value_rect = this.valueRect(),
-            x = Graphy.util.apply_value_to_new_ratio(graphRectPixel.x, _graph_rect.left, _graph_rect.right, value_rect.left, value_rect.right),
-            y = Graphy.util.apply_value_to_new_ratio(graphRectPixel.y, _graph_rect.bottom, _graph_rect.top, value_rect.top, value_rect.bottom, true);
+          var valueRect = this.valueRect(),
+            x = Graphy.util.applyValueToNewRatio(graphRectPixel.x, _graphRect.left, _graphRect.right, valueRect.left, valueRect.right),
+            y = Graphy.util.applyValueToNewRatio(graphRectPixel.y, _graphRect.bottom, _graphRect.top, valueRect.top, valueRect.bottom, true);
 
           return {x:x, y:y};
         },
         fromPlotPointToDocumentPixel: function(plotPoint) {
-          var value_rect = this.valueRect(),
-            x = Graphy.util.apply_value_to_new_ratio(plotPoint.x, value_rect.left, value_rect.right, _graph_rect.left, _graph_rect.right),
-            y = Graphy.util.apply_value_to_new_ratio(plotPoint.y, value_rect.top, value_rect.bottom, _graph_rect.bottom, _graph_rect.top, true);
+          var valueRect = this.valueRect(),
+            x = Graphy.util.applyValueToNewRatio(plotPoint.x, valueRect.left, valueRect.right, _graphRect.left, _graphRect.right),
+            y = Graphy.util.applyValueToNewRatio(plotPoint.y, valueRect.top, valueRect.bottom, _graphRect.bottom, _graphRect.top, true);
 
           return this.graphy.fromGraphRectPixelToDocumentPixel({x:x,y:y});
         },
@@ -776,7 +776,7 @@ var Graphy = {
     	      y_display_point = Math.round(point[1] * 100)/100;
     
           if(this.options.unit) {
-            label = y_display_point + ' ' + this.options.unit + ' @ ' + Graphy.formatters.human_date(x_display_point);
+            label = y_display_point + ' ' + this.options.unit + ' @ ' + Graphy.formatters.humanDate(x_display_point);
           } else {
             label = 'x: ' + x_display_point + ', y: ' + y_display_point;
           }
@@ -843,7 +843,7 @@ var Graphy = {
     //
     // Remove the plot, specified by plot reference or index.
     //
-    self.remove_plot = function( plot_or_index ) {
+    self.removePlot = function( plot_or_index ) {
       var p, i; 
       if ( plot_or_index.constructor == Number ) {
         i = plot_or_index;
@@ -860,10 +860,10 @@ var Graphy = {
     //
     // plots an array of plots. see plot for hash format.
     //
-    self.plots = function(plot_array, options) {
-      if ( plot_array ) {
-        for ( var i = 0; i < plot_array.length; i++ ) {
-          self.plot(plot_array[i], options);
+    self.plots = function(plotArray, options) {
+      if ( plotArray ) {
+        for ( var i = 0; i < plotArray.length; i++ ) {
+          self.plot(plotArray[i], options);
         }
       }
      
@@ -906,19 +906,19 @@ var Graphy = {
     //
     // getter/setter for max_x/y
     //
-    self.max = function(axis_name, val) {
-      if ( val != null ) { axis_name == 'x' ? _value_rect.right = val : _value_rect.top = val; }
-      return axis_name == 'x' ? _value_rect.right : _value_rect.top;
+    self.max = function(axisName, val) {
+      if ( val != null ) { axisName == 'x' ? _valueRect.right = val : _valueRect.top = val; }
+      return axisName == 'x' ? _valueRect.right : _valueRect.top;
     }
    
     //
     // getter/setter for min_x/y
     //
-    self.min = function(axis_name, val) {
+    self.min = function(axisName, val) {
       if ( val != null ) { 
-        axis_name == 'x' ? _value_rect.left = val : _value_rect.bottom = val; 
+        axisName == 'x' ? _valueRect.left = val : _valueRect.bottom = val; 
       }
-      return axis_name == 'x' ? _value_rect.left : _value_rect.bottom;
+      return axisName == 'x' ? _valueRect.left : _valueRect.bottom;
     }
    
     init(spec);
@@ -962,7 +962,7 @@ Graphy.filters = {
 }
 Graphy.formatters = {
  
-  human_date: function(val, precision) {
+  humanDate: function(val, precision) {
     var date = new Date(val);
     precision = precision || 1;
    
@@ -1007,7 +1007,7 @@ Graphy.interval = {
   month: 60000 * 60 * 24 * 28,
   year: 60000 * 60 * 24 * 365,
  
-  ms_to_s: function(ms) {
+  msToString: function(ms) {
     var s = "";
    
     switch (ms) {
@@ -1023,22 +1023,22 @@ Graphy.interval = {
     return s;
   },
  
-  floor: function(ms, step_interval) {
+  floor: function(ms, stepInterval) {
     var d = new Date(ms);
    
-    if (step_interval > Graphy.interval.second) { d.setSeconds(0); }
-    if (step_interval > Graphy.interval.minute) { d.setMinutes(0); }
-    if (step_interval > Graphy.interval.hour) { d.setHours(0); }
-    if (step_interval > Graphy.interval.day) { d.setDate(1); }
-    if (step_interval > Graphy.interval.month) { d.setMonth(0); }
+    if (stepInterval > Graphy.interval.second) { d.setSeconds(0); }
+    if (stepInterval > Graphy.interval.minute) { d.setMinutes(0); }
+    if (stepInterval > Graphy.interval.hour) { d.setHours(0); }
+    if (stepInterval > Graphy.interval.day) { d.setDate(1); }
+    if (stepInterval > Graphy.interval.month) { d.setMonth(0); }
    
     return d;
   },
  
-  step_date: function(ms, step_interval, increment) {
+  stepDate: function(ms, stepInterval, increment) {
     increment || (increment = 1);
    
-    switch ( step_interval ) {
+    switch ( stepInterval ) {
       case Graphy.interval.day:
         getSetFuncName = "Date";
         break;
@@ -1058,17 +1058,17 @@ Graphy.interval = {
       d.setHours(0); d.setMinutes(0); d.setSeconds(0);
       ms = d.getTime();
     } else {
-      ms += step_interval * increment;
+      ms += stepInterval * increment;
     }
    
     return ms;
   },
  
-  bigger_interval: function( interval ) {
-    var sorted_list = [Graphy.interval.second, Graphy.interval.minute, Graphy.interval.hour, Graphy.interval.day, Graphy.interval.month, Graphy.interval.year]
+  biggerInterval: function( interval ) {
+    var sortedList = [Graphy.interval.second, Graphy.interval.minute, Graphy.interval.hour, Graphy.interval.day, Graphy.interval.month, Graphy.interval.year]
    
-    for ( var i = 0; i < sorted_list.length; i++ ) {
-      if ( interval < sorted_list[i] ) { return sorted_list[i]; }
+    for ( var i = 0; i < sortedList.length; i++ ) {
+      if ( interval < sortedList[i] ) { return sortedList[i]; }
     }
 
     return Graphy.interval.year;
@@ -1090,86 +1090,86 @@ Graphy.interval = {
 
 Graphy.util = {
  
-  apply_value_to_new_ratio: function( val, old_min, old_max, new_min, new_max, flipped ) {
+  applyValueToNewRatio: function( val, oldMin, oldMax, newMin, newMax, flipped ) {
     var ret;
    
-    if ( old_min == old_max || new_min == new_max ) { 
+    if ( oldMin == oldMax || newMin == newMax ) { 
       ret = 0; 
     } else {
-      ret = (new_max - new_min)/(old_max-old_min) * (val - old_min);
+      ret = (newMax - newMin)/(oldMax-oldMin) * (val - oldMin);
     }
    
-    return flipped ? (new_max - new_min) - ret + new_min : ret + new_min;
+    return flipped ? (newMax - newMin) - ret + newMin : ret + newMin;
   },
    
-  create_rect: function(rect) {
-    var new_rect = { top: rect && rect.top ? rect.top : 0,
+  createRect: function(rect) {
+    var newRect = { top: rect && rect.top ? rect.top : 0,
       right: rect && rect.right ? rect.right : 0,
       bottom: rect && rect.bottom ? rect.bottom : 0,
       left: rect && rect.left ? rect.left : 0,
       height: function() { return Math.abs(this.bottom - this.top) },
       width: function() { return Math.abs(this.right - this.left) },
-      nice_rect: false,
-      recalculate_with_point: function(pt) { // param is 2 dimensional array [x,y]
-        if ( pt[0] < new_rect.left ) { new_rect.left = pt[0]; }
-        if ( pt[0] > new_rect.right ) { new_rect.right = pt[0]; }
-        if ( pt[1] < new_rect.bottom ) { new_rect.bottom = pt[1]; }
-        if ( pt[1] > new_rect.top ) { new_rect.top = pt[1]; }
-        new_rect.recalculate_nice_rect();
+      niceRect: false,
+      recalculateWithPoint: function(pt) { // param is 2 dimensional array [x,y]
+        if ( pt[0] < newRect.left ) { newRect.left = pt[0]; }
+        if ( pt[0] > newRect.right ) { newRect.right = pt[0]; }
+        if ( pt[1] < newRect.bottom ) { newRect.bottom = pt[1]; }
+        if ( pt[1] > newRect.top ) { newRect.top = pt[1]; }
+        newRect.recalculateNicePoint();
       },
-      recalculate_nice_rect: function() {
-        new_rect.nice_rect = $.extend({}, new_rect);
-        new_rect.nice_rect.bottom = Graphy.util.nice_num(new_rect.bottom, true);
-        new_rect.nice_rect.top = Graphy.util.nice_num(new_rect.top);
+      recalculateNicePoint: function() {
+        newRect.niceRect = $.extend({}, newRect);
+        newRect.niceRect.bottom = Graphy.util.niceNum(newRect.bottom, true);
+        newRect.niceRect.top = Graphy.util.niceNum(newRect.top);
 
-        if(new_rect.nice_rect.top == new_rect.nice_rect.bottom){
- 	  new_rect.nice_rect.top = new_rect.nice_rect.bottom + 1;
+        if(newRect.niceRect.top == newRect.niceRect.bottom){
+ 	  newRect.niceRect.top = newRect.niceRect.bottom + 1;
 	}  
       },
-      to_s: function() {
+      toString: function() {
         return "{top:" + this.top + ", bottom:" + this.bottom + ", left:" + this.left + ", right:" + this.right + "}";
       }
     };
    
-    new_rect.recalculate_nice_rect();
+    newRect.recalculateNicePoint();
    
-    return new_rect;
+    return newRect;
   },
  
-  function_by_name_or_function: function( name_or_function, pkg, default_function ) {
+  functionByNameOrFunction: function( nameOrFunction, pkg, defaultFunction ) {
     var func;
    
-    if ( name_or_function && name_or_function.constructor == Function ) {
-      func = name_or_function;
-    } else if ( name_or_function && name_or_function.constructor == String ) {
-      func = pkg[name_or_function];
+    if ( nameOrFunction && nameOrFunction.constructor == Function ) {
+      func = nameOrFunction;
+    } else if ( nameOrFunction && nameOrFunction.constructor == String ) {
+      func = pkg[nameOrFunction];
     } else {
-      func = default_function || null;
+      func = defaultFunction || null;
     }
    
     return func;
   },
  
-  nice_num: function( n, go_down ) {
+  niceNum: function( n, goDown ) {
     var signed = n < 0;
     n = Math.abs(n);
    
     var exponent = Math.floor( Math.log(n)/Math.LN10 );
     var frac = n/Math.pow(10,exponent);
   
-    var nice_frac = 10;
-    var nice_fracs = [ 0, 0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9, 1.0 ];
-    var whole_num = Math.floor(frac);
+    var niceFrac = 10;
+    var niceFracs = [ 0, 0.1, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.75, 0.8, 0.9, 1.0 ];
+    var wholeNum = Math.floor(frac);
    
-    for ( var i = 0; i < nice_fracs.length; i++ ) {
-      if ( ( go_down || signed ) && !( go_down && signed )  ) { // XOR
-        if ( frac >= whole_num + nice_fracs[i] ) { nice_frac = whole_num + nice_fracs[i]; break; }
+    for ( var i = 0; i < niceFracs.length; i++ ) {
+      if ( ( goDown || signed ) && !( goDown && signed )  ) { // XOR
+        if ( frac >= wholeNum + niceFracs[i] ) { niceFrac = wholeNum + niceFracs[i]; break; }
       } else {
-        if ( frac <= whole_num + nice_fracs[i] ) { nice_frac = whole_num + nice_fracs[i]; break; }
+        if ( frac <= wholeNum + niceFracs[i] ) { niceFrac = wholeNum + niceFracs[i]; break; }
       }
     }
    
-    return nice_frac * Math.pow(10,exponent) * ( signed ? -1 : 1);
+    return niceFrac * Math.pow(10,exponent) * ( signed ? -1 : 1);
   },
 
   calculatePrecision: function (low, high) {
@@ -1619,17 +1619,17 @@ Graphy.Color = (function() {
 	
 })();Graphy.renderers = {
  
-  v_rule: function(value, precision, graph) {
-    var ctx = graph.ctx(), value_rect = graph.value_rect(), graph_rect = graph.graph_rect();
+  vRule: function(value, precision, graph) {
+    var ctx = graph.ctx(), valueRect = graph.valueRect(), graphRect = graph.graphRect();
     ctx.save();
    
     ctx.beginPath();
     ctx.lineWidth = 1;
     ctx.strokeStyle = "#ccc";
    
-    x = Math.round(Graphy.util.apply_value_to_new_ratio(value, value_rect.left, value_rect.right, graph_rect.left, graph_rect.right)) - 0.5;
+    x = Math.round(Graphy.util.applyValueToNewRatio(value, valueRect.left, valueRect.right, graphRect.left, graphRect.right)) - 0.5;
    
-    for ( var y = 0; y < graph_rect.bottom - 2; y+=4 ) {
+    for ( var y = 0; y < graphRect.bottom - 2; y+=4 ) {
       ctx.moveTo( x, y );
       ctx.lineTo( x, y + 2 );
     }
@@ -1637,13 +1637,13 @@ Graphy.Color = (function() {
     ctx.stroke();      
     ctx.restore();
    
-    if ( graph.v_rule_label() ) {
+    if ( graph.vRuleLabel() ) {
       // FIXME: label should not be in the axis module at this point
-      Graphy.renderers.axis.label( Graphy.formatters.human_date(value, precision),
+      Graphy.renderers.axis.label( Graphy.formatters.humanDate(value, precision),
         x + 15, 
         57, 
         graph,
-        "graphy_v_rule_label", 
+        "graphy_vRuleLabel", 
         null,
         "left" );
     }
@@ -1651,8 +1651,8 @@ Graphy.Color = (function() {
  
   plot: function(index, data, options, graph) {
     var ctx = graph.ctx(), 
-        value_rect = options['unit'] ? graph.value_rect_by_unit(options['unit']).nice_rect : graph.value_rect().nice_rect,
-        graph_rect = graph.graph_rect(),
+        valueRect = options['unit'] ? graph.valueRectByUnit(options['unit']).niceRect : graph.valueRect().niceRect,
+        graphRect = graph.graphRect(),
         x,
         y;
    
@@ -1662,8 +1662,8 @@ Graphy.Color = (function() {
     ctx.lineWidth = options.width || 1;
    
     for ( var j = 0; j < data.length; j++ ) {
-      x = Math.round( Graphy.util.apply_value_to_new_ratio(data[j][0], value_rect.left, value_rect.right, graph_rect.left, graph_rect.right) );
-      y = Math.round( Graphy.util.apply_value_to_new_ratio(data[j][1], value_rect.bottom, value_rect.top, graph_rect.top, graph_rect.bottom, true) );
+      x = Math.round( Graphy.util.applyValueToNewRatio(data[j][0], valueRect.left, valueRect.right, graphRect.left, graphRect.right) );
+      y = Math.round( Graphy.util.applyValueToNewRatio(data[j][1], valueRect.bottom, valueRect.top, graphRect.top, graphRect.bottom, true) );
      
       ctx.fillStyle = fill;
       ctx.fillRect(x-2, y-2, 3, 3);
@@ -1680,12 +1680,12 @@ Graphy.Color = (function() {
     }
    
     var ctx = graph.ctx(), 
-        value_rect = options['unit'] ? graph.value_rect_by_unit(options['unit']).nice_rect : graph.value_rect().nice_rect, 
-        graph_rect = graph.graph_rect(),
+        valueRect = options['unit'] ? graph.valueRectByUnit(options['unit']).niceRect : graph.valueRect().niceRect, 
+        graphRect = graph.graphRect(),
         x,
         y,
         rgb = Graphy.Color.create(options.color || "gray").rgb,
-        alpha = !graph.has_selected_items() || options['selected'] ? 1 : 0.2;
+        alpha = !graph.hasSelectedItems() || options['selected'] ? 1 : 0.2;
    
     ctx.save();
     ctx.beginPath();
@@ -1693,8 +1693,8 @@ Graphy.Color = (function() {
     ctx.lineWidth = options.width || 1;
    
     for ( var j = 0; j < data.length; j++ ) {
-      x = Graphy.util.apply_value_to_new_ratio(data[j][0], value_rect.left, value_rect.right, graph_rect.left, graph_rect.right) + 0.5;
-      y = Graphy.util.apply_value_to_new_ratio(data[j][1], value_rect.bottom, value_rect.top, graph_rect.top, graph_rect.bottom, true) + 0.5;
+      x = Graphy.util.applyValueToNewRatio(data[j][0], valueRect.left, valueRect.right, graphRect.left, graphRect.right) + 0.5;
+      y = Graphy.util.applyValueToNewRatio(data[j][1], valueRect.bottom, valueRect.top, graphRect.top, graphRect.bottom, true) + 0.5;
       j ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
     }
     ctx.stroke();
@@ -1704,35 +1704,35 @@ Graphy.Color = (function() {
  
   bar: function(index, data, options, graph) {
     var ctx = graph.ctx(),
-        value_rect = options['unit'] ? graph.value_rect_by_unit(options['unit']).nice_rect : graph.value_rect().nice_rect, 
-        graph_rect = graph.graph_rect(),
+        valueRect = options['unit'] ? graph.valueRectByUnit(options['unit']).niceRect : graph.valueRect().niceRect, 
+        graphRect = graph.graphRect(),
         x,
         y,
-        zero_y = Graphy.util.apply_value_to_new_ratio(0, value_rect.bottom, value_rect.top, graph_rect.top, graph_rect.bottom, true),
+        zero_y = Graphy.util.applyValueToNewRatio(0, valueRect.bottom, valueRect.top, graphRect.top, graphRect.bottom, true),
         h,
-        maxW = _.min([60, Math.floor((graph.graph_rect().right - graph.graph_rect().left) / (graph.maxNumBarsInPlot()))]),//how wide a bar slot can be
+        maxW = _.min([60, Math.floor((graph.graphRect().right - graph.graphRect().left) / (graph.maxNumBarsInPlot()))]),//how wide a bar slot can be
         w = _.max([1, Math.floor(maxW / graph.barPlots().length)-1]),//width of the bar
         top_color = options['color'] || "gray",
         bottom_color = top_color,
         gradient,
-        alpha = !graph.has_selected_items() || options['selected'] ? 1 : 0.2;
+        alpha = !graph.hasSelectedItems() || options['selected'] ? 1 : 0.2;
 
-    var precision = Graphy.util.calculatePrecision(value_rect.bottom, value_rect.top)
+    var precision = Graphy.util.calculatePrecision(valueRect.bottom, valueRect.top)
 
-    bottom_rgb = Graphy.Color.create(top_color).darken(.1).rgb;
-    top_rgb = Graphy.Color.create(top_color).brighten(.05).rgb;
+    bottomRGB = Graphy.Color.create(top_color).darken(.1).rgb;
+    topRGB = Graphy.Color.create(top_color).brighten(.05).rgb;
 
     ctx.save();
     ctx.beginPath();
    
     for ( var j = 0; j < data.length; j++ ) {
-      x = Math.round( Graphy.util.apply_value_to_new_ratio(data[j][0], value_rect.left, value_rect.right, graph_rect.left, graph_rect.right)) - Math.ceil(maxW/2) + ((w+1) * (index-1));//indexed is 1 based
-      y = Math.round( Graphy.util.apply_value_to_new_ratio(data[j][1], value_rect.bottom, value_rect.top, graph_rect.top, graph_rect.bottom, true) );
+      x = Math.round( Graphy.util.applyValueToNewRatio(data[j][0], valueRect.left, valueRect.right, graphRect.left, graphRect.right)) - Math.ceil(maxW/2) + ((w+1) * (index-1));//indexed is 1 based
+      y = Math.round( Graphy.util.applyValueToNewRatio(data[j][1], valueRect.bottom, valueRect.top, graphRect.top, graphRect.bottom, true) );
       h = zero_y - y;
          
       gradient = ctx.createLinearGradient(x, y, x, y + h);
-      gradient.addColorStop(0, 'rgba('+top_rgb.r+', '+top_rgb.g+', '+top_rgb.b+', '+alpha+')');
-      gradient.addColorStop(0.5, 'rgba('+bottom_rgb.r+', '+bottom_rgb.g+', '+bottom_rgb.b+', '+alpha+')');
+      gradient.addColorStop(0, 'rgba('+topRGB.r+', '+topRGB.g+', '+topRGB.b+', '+alpha+')');
+      gradient.addColorStop(0.5, 'rgba('+bottomRGB.r+', '+bottomRGB.g+', '+bottomRGB.b+', '+alpha+')');
       ctx.fillStyle = gradient;
       ctx.fillRect( x, y, w, h );
      
@@ -1749,80 +1749,80 @@ Graphy.Color = (function() {
   axis: {
    
     none: function(action, graph) {
-      return graph.graph_rect();
+      return graph.graphRect();
     },
    
     //
     // just the facts (text)
     //
-    clean_x: function(action, graph) {
+    cleanX: function(action, graph) {
       var $canvas = graph.$canvas(), 
           ctx = graph.ctx(), 
-          value_rect = graph.value_rect().nice_rect, 
-          graph_rect = graph.graph_rect(), 
-          x_axis_interval = graph.x_axis_interval(),
-          x_axis_label_formatter = graph.x_axis_label_formatter();
+          valueRect = graph.valueRect().niceRect, 
+          graphRect = graph.graphRect(), 
+          xAxisInterval = graph.xAxisInterval(),
+          xAxisLabelFormatter = graph.xAxisLabelFormatter();
      
       if ( action == "measure" ) {
-        graph_rect.bottom = $canvas.height() - 24 - ( graph.x_units().length ? 20 : 0 );
-        graph_rect.right = $canvas.width() - 14;
+        graphRect.bottom = $canvas.height() - 24 - ( graph.xUnits().length ? 20 : 0 );
+        graphRect.right = $canvas.width() - 14;
       } else {
-        var number_of_labels = Math.max( Math.floor( ( graph_rect.right - graph_rect.left ) / 140 ) + 1, 2 );
-        Graphy.renderers.axis.x_value_labels( number_of_labels, 0, graph_rect.bottom + 10, "graphy_axis_line_x_value_label", "center", graph );
-        Graphy.renderers.axis.unit_labels( "x", graph );
+        var numberOfLabels = Math.max( Math.floor( ( graphRect.right - graphRect.left ) / 140 ) + 1, 2 );
+        Graphy.renderers.axis.xValueLabels( numberOfLabels, 0, graphRect.bottom + 10, "graphy_axis_line_x_value_label", "center", graph );
+        Graphy.renderers.axis.unitLabels( "x", graph );
       }
 
-      return graph_rect;
+      return graphRect;
     },
    
     //
     // text with a horizontal bottom line
     //
-    line_x: function(action, graph) {
+    lineX: function(action, graph) {
       var $canvas = graph.$canvas(), 
           ctx = graph.ctx(), 
-          value_rect = graph.value_rect().nice_rect, 
-          graph_rect = graph.graph_rect(), 
-          x_axis_interval = graph.x_axis_interval(),
-          x_axis_label_formatter = graph.x_axis_label_formatter();
+          valueRect = graph.valueRect().niceRect, 
+          graphRect = graph.graphRect(), 
+          xAxisInterval = graph.xAxisInterval(),
+          xAxisLabelFormatter = graph.xAxisLabelFormatter();
      
       if ( action == "measure" ) {
-        graph_rect.bottom = $canvas.height() - 24 - ( graph.x_units().length ? 20 : 0 );
-        graph_rect.right = $canvas.width() - 14;
+        graphRect.bottom = $canvas.height() - 24 - ( graph.xUnits().length ? 20 : 0 );
+        graphRect.right = $canvas.width() - 14;
       } else {
         ctx.save();
      
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.strokeStyle = "#ddd";
-        ctx.moveTo(graph_rect.left - 16.5, graph_rect.bottom - 0.5);
-        ctx.lineTo($canvas.width(), graph_rect.bottom - 0.5);
+        ctx.moveTo(graphRect.left - 16.5, graphRect.bottom - 0.5);
+        ctx.lineTo($canvas.width(), graphRect.bottom - 0.5);
         ctx.stroke();
      
         ctx.restore();
      
-        var number_of_labels = Math.max( Math.floor( ( graph_rect.right - graph_rect.left ) / 72 ) + 1, 2 );
-        Graphy.renderers.axis.x_value_labels( number_of_labels, 0, graph_rect.bottom + 10, "graphy_axis_line_x_value_label", "center", graph );
-        Graphy.renderers.axis.unit_labels( "x", graph );
+        var numberOfLabels = Math.max( Math.floor( ( graphRect.right - graphRect.left ) / 72 ) + 1, 2 );
+        Graphy.renderers.axis.xValueLabels( numberOfLabels, 0, graphRect.bottom + 10, "graphy_axis_line_x_value_label", "center", graph );
+        Graphy.renderers.axis.unitLabels( "x", graph );
       }
      
-      return graph_rect;
+      return graphRect;
     },
    
     //
     // simple horizontal line with ticks for each plot.
     //
-    scatter_x: function(action, graph) {
+    scatterX: function(action, graph) {
       var $canvas = graph.$canvas(), 
           ctx = graph.ctx(), 
-          value_rect = graph.value_rect().nice_rect, 
-          graph_rect = graph.graph_rect(), 
-          x_axis_interval = graph.x_axis_interval(),
-          x_axis_label_formatter = graph.x_axis_label_formatter();
+          valueRect = graph.valueRect().niceRect, 
+          graphRect = graph.graphRect(), 
+          xAxisInterval = graph.xAxisInterval(),
+          xAxisLabelFormatter = graph.xAxisLabelFormatter();
      
       if ( action == "measure" ) {
-        graph_rect.bottom = $canvas.height() - 24 - ( graph.x_units().length ? 20 : 0 );
-        graph_rect.right = $canvas.width() - 14;
+        graphRect.bottom = $canvas.height() - 24 - ( graph.xUnits().length ? 20 : 0 );
+        graphRect.right = $canvas.width() - 14;
       } else {
         // kick off drawing
         ctx.save();
@@ -1831,85 +1831,85 @@ Graphy.Color = (function() {
        
         // long axis line
         ctx.beginPath();
-        ctx.moveTo(graph_rect.left - 1, graph_rect.bottom + 16.5);
-        ctx.lineTo(graph_rect.right + 1, graph_rect.bottom + 16.5);
+        ctx.moveTo(graphRect.left - 1, graphRect.bottom + 16.5);
+        ctx.lineTo(graphRect.right + 1, graphRect.bottom + 16.5);
         ctx.stroke();
        
         // labels
-        var number_of_labels = Math.max( Math.floor( ( graph_rect.right - graph_rect.left ) / 72 ) + 1, 2 );
-        Graphy.renderers.axis.x_value_labels( number_of_labels, 0, graph_rect.bottom + 18, "graphy_axis_line_x_value_label", "center", graph );
-        Graphy.renderers.axis.unit_labels( "x", graph );
+        var numberOfLabels = Math.max( Math.floor( ( graphRect.right - graphRect.left ) / 72 ) + 1, 2 );
+        Graphy.renderers.axis.xValueLabels( numberOfLabels, 0, graphRect.bottom + 18, "graphy_axis_line_x_value_label", "center", graph );
+        Graphy.renderers.axis.unitLabels( "x", graph );
        
         // finish drawing
         ctx.restore();
        
-        Graphy.renderers.axis.scatter_ticks(graph);
+        Graphy.renderers.axis.scatterTicks(graph);
       }
      
-      return graph_rect;
+      return graphRect;
     },
    
     //
     // simple horizontal lines with a dark bottom line
     //
-    clean_y: function(action, graph) {
+    cleanY: function(action, graph) {
       var $canvas = graph.$canvas(), 
           ctx = graph.ctx(), 
-          value_rect = graph.value_rect().nice_rect, 
-          graph_rect = graph.graph_rect(),
-          axis_pad = graph.y_units().length ? 24 : 0;     
+          valueRect = graph.valueRect().niceRect, 
+          graphRect = graph.graphRect(),
+          axis_pad = graph.yUnits().length ? 24 : 0;     
      
       if ( action == "measure" ) {
-        graph_rect.left = axis_pad;
-        graph_rect.top = 16;
+        graphRect.left = axis_pad;
+        graphRect.top = 16;
       } else {
         ctx.save();
         ctx.lineWidth = 1;
  
-        var number_of_lines = Math.max( Math.floor( ( graph_rect.bottom - graph_rect.top ) / 70 ) + 1, 3 );
-        var h, round_h;
+        var numberOfLines = Math.max( Math.floor( ( graphRect.bottom - graphRect.top ) / 70 ) + 1, 3 );
+        var h, roundH;
  
-        for ( var i = 0; i < number_of_lines; i++ ) {
-          h = graph_rect.bottom - ( i * ( ( graph_rect.bottom - graph_rect.top ) / ( number_of_lines - 1 )  ) );
-          round_h = Math.round(h);
+        for ( var i = 0; i < numberOfLines; i++ ) {
+          h = graphRect.bottom - ( i * ( ( graphRect.bottom - graphRect.top ) / ( numberOfLines - 1 )  ) );
+          roundH = Math.round(h);
           ctx.beginPath();
           ctx.strokeStyle = i ? "#f0f0f0" : "#ddd";
-          ctx.moveTo(axis_pad + 3, round_h - 0.5);
-          ctx.lineTo($canvas.width(), round_h - 0.5);
+          ctx.moveTo(axis_pad + 3, roundH - 0.5);
+          ctx.lineTo($canvas.width(), roundH - 0.5);
           ctx.stroke();
         }
  
         // labels
-        Graphy.renderers.axis.y_value_labels( number_of_lines, 4, -14, "graphy_axis_clean_y_value_label", "left",  graph );
-        Graphy.renderers.axis.unit_labels( "y", graph );
+        Graphy.renderers.axis.yValueLabels( numberOfLines, 4, -14, "graphy_axis_clean_y_value_label", "left",  graph );
+        Graphy.renderers.axis.unitLabels( "y", graph );
         ctx.restore();
        
         // pad in the edges a little more
-        graph_rect.left += 30;
-        graph_rect.right -= 30;
+        graphRect.left += 30;
+        graphRect.right -= 30;
       }
      
-      return graph_rect;
+      return graphRect;
     },
    
     //
     // simple vertical line
     //
-    line_y: function(action, graph) {
+    lineY: function(action, graph) {
       var $canvas = graph.$canvas(), 
           ctx = graph.ctx(), 
-          value_rect = graph.value_rect().nice_rect, 
-          graph_rect = graph.graph_rect(),
-          axis_pad = graph.y_units().length ? 24 : 0;
+          valueRect = graph.valueRect().niceRect, 
+          graphRect = graph.graphRect(),
+          axis_pad = graph.yUnits().length ? 24 : 0;
      
       if ( action == "measure" ) {
-        graph_rect.left = axis_pad;
-        graph_rect.top = 16;
+        graphRect.left = axis_pad;
+        graphRect.top = 16;
       } else {
         // labels
-        var number_of_lines = Math.max( Math.floor( ( graph_rect.bottom - graph_rect.top ) / 72 ) + 1, 3 );
-        Graphy.renderers.axis.y_value_labels( number_of_lines, 0, -8, "graphy_axis_line_y_value_label", "right", graph );
-        Graphy.renderers.axis.unit_labels( "y", graph );
+        var numberOfLines = Math.max( Math.floor( ( graphRect.bottom - graphRect.top ) / 72 ) + 1, 3 );
+        Graphy.renderers.axis.yValueLabels( numberOfLines, 0, -8, "graphy_axis_line_y_value_label", "right", graph );
+        Graphy.renderers.axis.unitLabels( "y", graph );
        
         // the line
         ctx.save();
@@ -1917,41 +1917,41 @@ Graphy.Color = (function() {
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.strokeStyle = "#ddd";
-        ctx.moveTo(graph_rect.left - 16.5, graph_rect.top - 1);
-        ctx.lineTo(graph_rect.left - 16.5, graph_rect.bottom + 1);
+        ctx.moveTo(graphRect.left - 16.5, graphRect.top - 1);
+        ctx.lineTo(graphRect.left - 16.5, graphRect.bottom + 1);
         ctx.stroke();
        
         ctx.restore();
       }
      
-      return graph_rect;
+      return graphRect;
     },
    
     //
     // simple vertical line with ticks for each plot.
     //
-    scatter_y: function(action, graph) {
-      var graph_rect = Graphy.renderers.axis.line_y(action, graph);
+    scatterY: function(action, graph) {
+      var graphRect = Graphy.renderers.axis.lineY(action, graph);
      
       if ( action == "draw" ) {
         var $canvas = graph.$canvas(), 
             ctx = graph.ctx(),
-            value_rect = graph.value_rect().nice_rect;
+            valueRect = graph.valueRect().niceRect;
        
         // adjust for the ticks
-        graph_rect.left += 8;
+        graphRect.left += 8;
        
-        if (graph.x_axis_renderer() != Graphy.renderers.axis.scatter_x) { Graphy.renderers.axis.scatter_ticks(graph); }
+        if (graph.xAxisRenderer() != Graphy.renderers.axis.scatterX) { Graphy.renderers.axis.scatterTicks(graph); }
       }
      
-      return graph_rect;
+      return graphRect;
     },
    
-    scatter_ticks: function(graph) {
+    scatterTicks: function(graph) {
       var $canvas = graph.$canvas(), 
           ctx = graph.ctx(),
-          value_rect = graph.value_rect().nice_rect, 
-          graph_rect = graph.graph_rect();
+          valueRect = graph.valueRect().niceRect, 
+          graphRect = graph.graphRect();
      
       // kick off drawing
       ctx.save();
@@ -1965,16 +1965,16 @@ Graphy.Color = (function() {
         data = plots[i].data;
         data_length = data.length;
         for ( var j = 0; j < data_length; j++ ) {
-          if (graph.y_axis_renderer() == Graphy.renderers.axis.scatter_y) {
-            y = Math.floor(Graphy.util.apply_value_to_new_ratio( data[j][1], value_rect.bottom, value_rect.top, graph_rect.bottom, graph_rect.top )) - 0.5;
-            ctx.moveTo(graph_rect.left - 22, y);
-            ctx.lineTo(graph_rect.left - 18, y);
+          if (graph.yAxisRenderer() == Graphy.renderers.axis.scatterY) {
+            y = Math.floor(Graphy.util.applyValueToNewRatio( data[j][1], valueRect.bottom, valueRect.top, graphRect.bottom, graphRect.top )) - 0.5;
+            ctx.moveTo(graphRect.left - 22, y);
+            ctx.lineTo(graphRect.left - 18, y);
           }
          
-          if (graph.x_axis_renderer() == Graphy.renderers.axis.scatter_x) {
-            x = Math.floor(Graphy.util.apply_value_to_new_ratio( data[j][0], value_rect.left, value_rect.right, graph_rect.left, graph_rect.right )) - 0.5;
-            ctx.moveTo(x, graph_rect.bottom + 14);
-            ctx.lineTo(x, graph_rect.bottom + 10);
+          if (graph.xAxisRenderer() == Graphy.renderers.axis.scatterX) {
+            x = Math.floor(Graphy.util.applyValueToNewRatio( data[j][0], valueRect.left, valueRect.right, graphRect.left, graphRect.right )) - 0.5;
+            ctx.moveTo(x, graphRect.bottom + 14);
+            ctx.lineTo(x, graphRect.bottom + 10);
           }
         }
       }
@@ -1984,7 +1984,7 @@ Graphy.Color = (function() {
       ctx.restore();
     },
    
-    label: function(val, x, y, graph, style_name, formatter, align, color, opacity) {	
+    label: function(val, x, y, graph, styleName, formatter, align, color, opacity) {	
       var $canvas = graph.$canvas();
       var left = Math.round($canvas.offset().left + x);
       var top = Math.round($canvas.offset().top + y);
@@ -1996,7 +1996,7 @@ Graphy.Color = (function() {
 
       if ( formatter ) { val = formatter(val); }
      
-      $el = $("<p class='"+style_name+" graphy_axis_label graphy_axis_label_"+graph.index()+"' style='"+ ( color ? 'color:' + color + '; ' : '' ) + ( opacity ? 'opacity:' + opacity + '; ' : '' ) + "'>" + val + "</p>");
+      $el = $("<p class='"+styleName+" graphy_axis_label graphy_axis_label_"+graph.index()+"' style='"+ ( color ? 'color:' + color + '; ' : '' ) + ( opacity ? 'opacity:' + opacity + '; ' : '' ) + "'>" + val + "</p>");
       $el.css({position:'absolute','z-index':1000}).prependTo('body').addClass('graphy');
      
       switch ( align ) {
@@ -2019,7 +2019,7 @@ Graphy.Color = (function() {
     //
     // param axis can be either "x" or "y"
     //
-    unit_labels: function(axis, graph) {
+    unitLabels: function(axis, graph) {
       var units = graph.units(axis),
         $canvas = graph.$canvas(),
         unit_i = units.length, 
@@ -2044,48 +2044,48 @@ Graphy.Color = (function() {
      
       if ( axis_label ) {
         if ( axis == "x" ) {
-          Graphy.renderers.axis.label( axis_label, graph.graph_rect().left + (graph.graph_rect().width() / 2), graph.graph_rect().top + graph.graph_rect().height() + 40, graph, "graphy_axis_unit_label graphy_axis_x_unit_label", null, "center" );
+          Graphy.renderers.axis.label( axis_label, graph.graphRect().left + (graph.graphRect().width() / 2), graph.graphRect().top + graph.graphRect().height() + 40, graph, "graphy_axis_unit_label graphy_axis_xUnit_label", null, "center" );
         } else {
-          Graphy.renderers.axis.label( axis_label, 0, graph.graph_rect().top + (graph.graph_rect().height() / 2), graph, "graphy_axis_unit_label graphy_axis_y_unit_label vertical_text", null, "vertical_center" );
+          Graphy.renderers.axis.label( axis_label, 0, graph.graphRect().top + (graph.graphRect().height() / 2), graph, "graphy_axis_unit_label graphy_axis_yUnit_label vertical_text", null, "vertical_center" );
         }
       }
     },
    
-    x_value_labels: function(number_of_labels, x_offset, y_offset, style_name, align, graph) {	
+    xValueLabels: function(numberOfLabels, xOffset, yOffset, styleName, align, graph) {	
       var $canvas = graph.$canvas(),
-          value_rect = graph.value_rect().nice_rect,
-          graph_rect = graph.graph_rect(),
-          x_axis_interval = graph.x_axis_interval(),
-          x_axis_label_formatter = graph.x_axis_label_formatter(),
+          valueRect = graph.valueRect().niceRect,
+          graphRect = graph.graphRect(),
+          xAxisInterval = graph.xAxisInterval(),
+          xAxisLabelFormatter = graph.xAxisLabelFormatter(),
           align = align || "center",
-          round_v, labels_to_draw = {};
+          roundV, labels_to_draw = {};
 
-      if (!value_rect.width() > 0) {
+      if (!valueRect.width() > 0) {
         return;
       }
 
-      if ( !x_axis_interval || x_axis_interval < Graphy.interval.hour ) { x_axis_interval = Graphy.interval.hour; }
+      if ( !xAxisInterval || xAxisInterval < Graphy.interval.hour ) { xAxisInterval = Graphy.interval.hour; }
 
-      var bigger_interval = Graphy.interval.bigger_interval(x_axis_interval);
-      var left = x_axis_label_formatter == Graphy.formatters.human_date ?  Graphy.interval.floor(value_rect.left, bigger_interval).getTime() : value_rect.left;
+      var biggerInterval = Graphy.interval.biggerInterval(xAxisInterval);
+      var left = xAxisLabelFormatter == Graphy.formatters.humanDate ?  Graphy.interval.floor(valueRect.left, biggerInterval).getTime() : valueRect.left;
       var labelCount = 0;
 
-      if ( x_axis_interval > Graphy.interval.hour && x_axis_label_formatter == Graphy.formatters.human_date ) {
+      if ( xAxisInterval > Graphy.interval.hour && xAxisLabelFormatter == Graphy.formatters.humanDate ) {
         // step by nice dates
-        var step_increment = Math.ceil(((value_rect.right - value_rect.left)/x_axis_interval)/number_of_labels);
+        var stepIncrement = Math.ceil(((valueRect.right - valueRect.left)/xAxisInterval)/numberOfLabels);
        
         for ( ms = left; 
-              ms <= value_rect.right; 
-              ms = Graphy.interval.step_date(ms, x_axis_interval, step_increment) ) {
+              ms <= valueRect.right; 
+              ms = Graphy.interval.stepDate(ms, xAxisInterval, stepIncrement) ) {
 
-          round_v = Math.round( Graphy.util.apply_value_to_new_ratio( ms, 
-            value_rect.left,
-            value_rect.right, 
-            graph_rect.left, 
-            graph_rect.right ) );
+          roundV = Math.round( Graphy.util.applyValueToNewRatio( ms, 
+            valueRect.left,
+            valueRect.right, 
+            graphRect.left, 
+            graphRect.right ) );
 
-          if (round_v > 16 && !labels_to_draw[ms]) { 
-            labels_to_draw[ms] = {x: round_v, text: Graphy.formatters.human_date(ms, x_axis_interval)}; 
+          if (roundV > 16 && !labels_to_draw[ms]) { 
+            labels_to_draw[ms] = {x: roundV, text: Graphy.formatters.humanDate(ms, xAxisInterval)}; 
           }
          
           labelCount++; 
@@ -2094,44 +2094,44 @@ Graphy.Color = (function() {
       } else {
         // raw-style 
         // first pass with the bigger interval
-        if ( x_axis_label_formatter == Graphy.formatters.human_date ) {
+        if ( xAxisLabelFormatter == Graphy.formatters.humanDate ) {
           for ( var ms = left; 
-                ms <= value_rect.right; 
-                ms = Graphy.interval.step_date(ms, bigger_interval) ) {
+                ms <= valueRect.right; 
+                ms = Graphy.interval.stepDate(ms, biggerInterval) ) {
 
-            round_v = Math.round( Graphy.util.apply_value_to_new_ratio( ms, 
-              value_rect.left,
-              value_rect.right, 
-              graph_rect.left, 
-              graph_rect.right ) );
+            roundV = Math.round( Graphy.util.applyValueToNewRatio( ms, 
+              valueRect.left,
+              valueRect.right, 
+              graphRect.left, 
+              graphRect.right ) );
 
-            if (round_v > 16) { 
-              labels_to_draw[ms] = {x: round_v, text: Graphy.formatters.human_date(ms, bigger_interval)}; 
-              Graphy.renderers.v_rule( ms, bigger_interval, graph );
+            if (roundV > 16) { 
+              labels_to_draw[ms] = {x: roundV, text: Graphy.formatters.humanDate(ms, biggerInterval)}; 
+              Graphy.renderers.vRule( ms, biggerInterval, graph );
             }
             labelCount++; // include unplotted labels
           }
         }
        
-        var precision = Graphy.util.calculatePrecision(value_rect.left, value_rect.right);
+        var precision = Graphy.util.calculatePrecision(valueRect.left, valueRect.right);
 
         // fill in (1/2, 1/4, 1/8...) until out of labels       
-        for ( var jump = bigger_interval;
+        for ( var jump = biggerInterval;
               // protect against jump getting so small that left + jump == left
-              labelCount*2-1 < number_of_labels && left + jump > left;
+              labelCount*2-1 < numberOfLabels && left + jump > left;
               jump /= 2) {
           for ( n = left + jump; 
-                n <= value_rect.right; 
+                n <= valueRect.right; 
                 n += jump ) {
                  
-            round_v = Math.round( Graphy.util.apply_value_to_new_ratio( n, 
-              value_rect.left,
-              value_rect.right, 
-              graph_rect.left, 
-              graph_rect.right ) );
+            roundV = Math.round( Graphy.util.applyValueToNewRatio( n, 
+              valueRect.left,
+              valueRect.right, 
+              graphRect.left, 
+              graphRect.right ) );
 
-            if (round_v && !labels_to_draw[n]) { 
-              labels_to_draw[n] = {x: round_v, text: x_axis_label_formatter ? x_axis_label_formatter(n, x_axis_interval) : n.toPrecision(precision) }; 
+            if (roundV && !labels_to_draw[n]) { 
+              labels_to_draw[n] = {x: roundV, text: xAxisLabelFormatter ? xAxisLabelFormatter(n, xAxisInterval) : n.toPrecision(precision) }; 
               labelCount++;
             }
           }
@@ -2144,10 +2144,10 @@ Graphy.Color = (function() {
         if ( label.x > last_x + 10 || label.x < last_x - 10 ) { // protect against crowding labels
           Graphy.renderers.axis.label( 
             label.text, 
-            label.x + x_offset,
-            y_offset, 
+            label.x + xOffset,
+            yOffset, 
             graph, 
-            style_name, 
+            styleName, 
             null, 
             align );
           last_x = label.x;
@@ -2155,60 +2155,60 @@ Graphy.Color = (function() {
       });        
     },
    
-    y_value_labels: function(number_of_labels, x_offset, y_offset, style_name, align, graph) {
+    yValueLabels: function(numberOfLabels, xOffset, yOffset, styleName, align, graph) {
       var $canvas = graph.$canvas(),
-          graph_rect = graph.graph_rect(),
+          graphRect = graph.graphRect(),
           h, 
-          round_h, 
+          roundH, 
           val, 
           precise, 
           precision, 
           $el, 
-          array_of_$els = [],
-          max_label_width, 
-          x = graph_rect.left,
-          y_units = graph.y_units();
+          arrayOf$Els = [],
+          maxLabelWidth, 
+          x = graphRect.left,
+          yUnits = graph.yUnits();
      
      
       // this guy puts everything together to make an individual label
-      var _y_label = function(value_rect, x, color) {
-        precision = Graphy.util.calculatePrecision(value_rect.bottom, value_rect.top)
+      var _yLabel = function(valueRect, x, color) {
+        precision = Graphy.util.calculatePrecision(valueRect.bottom, valueRect.top)
 
-        val = Math.round( Graphy.util.apply_value_to_new_ratio( h, graph_rect.bottom, graph_rect.top, value_rect.bottom, value_rect.top ) * 100 ) / 100;
+        val = Math.round( Graphy.util.applyValueToNewRatio( h, graphRect.bottom, graphRect.top, valueRect.bottom, valueRect.top ) * 100 ) / 100;
 
         precise = val.toPrecision(precision);
 
-        return Graphy.renderers.axis.label( val == precise ? val : precise, x_offset + x, round_h + y_offset, graph, style_name, null, align, color );
+        return Graphy.renderers.axis.label( val == precise ? val : precise, xOffset + x, roundH + yOffset, graph, styleName, null, align, color );
       };
      
       // loop through the rows for each unit
-      for ( var j = 0; j < (y_units.length || 1); j++ ) {
-        max_label_width = 0;
+      for ( var j = 0; j < (yUnits.length || 1); j++ ) {
+        maxLabelWidth = 0;
        
-        for ( var i = 0; i < number_of_labels; i++ ) {
-          h = graph_rect.bottom - ( i * ( ( graph_rect.bottom - graph_rect.top ) / ( number_of_labels - 1 ) ) );
-          round_h = Math.round(h);
+        for ( var i = 0; i < numberOfLabels; i++ ) {
+          h = graphRect.bottom - ( i * ( ( graphRect.bottom - graphRect.top ) / ( numberOfLabels - 1 ) ) );
+          roundH = Math.round(h);
          
-          if ( y_units.length ) {
-            $el = _y_label( graph.value_rect_by_unit(y_units[j]['label']).nice_rect, x, ( y_units.length > 1 ? y_units[j]['color'] : null ) );
+          if ( yUnits.length ) {
+            $el = _yLabel( graph.valueRectByUnit(yUnits[j]['label']).niceRect, x, ( yUnits.length > 1 ? yUnits[j]['color'] : null ) );
           } else {
-            $el = _y_label( graph.value_rect().nice_rect, x);
+            $el = _yLabel( graph.valueRect().niceRect, x);
           }
          
-          array_of_$els.push( $el );
-          max_label_width = Math.max( $el.width(), max_label_width );
+          arrayOf$Els.push( $el );
+          maxLabelWidth = Math.max( $el.width(), maxLabelWidth );
         }
        
-        x += Math.ceil(max_label_width) + 15;
+        x += Math.ceil(maxLabelWidth) + 15;
       }
      
       if ( align == "right" ) { 
-        var number_of_$els = array_of_$els.length;
-        for ( var k = 0; k < number_of_$els; k++ ) {
-           array_of_$els[k].offset({left: array_of_$els[k].offset().left + max_label_width - 5});
+        var numberOf$Els = arrayOf$Els.length;
+        for ( var k = 0; k < numberOf$Els; k++ ) {
+           arrayOf$Els[k].offset({left: arrayOf$Els[k].offset().left + maxLabelWidth - 5});
         }
       }
-      if ( x > graph_rect.left ) { graph_rect.left = x; }
+      if ( x > graphRect.left ) { graphRect.left = x; }
     }  
   }
 }

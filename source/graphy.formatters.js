@@ -1,6 +1,6 @@
 Graphy.formatters = {
  
-  human_date: function(val, precision) {
+  humanDate: function(val, precision) {
     var date = new Date(val);
     precision = precision || 1;
    

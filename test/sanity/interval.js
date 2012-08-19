@@ -12,7 +12,7 @@ this.intervalSanity = {
 	
 	'step to tomorrow': function (test) {
 		var date = new Date(2012, 8, 17, 3, 22, 12);
-		var steppedMS = Graphy.interval.step_date(date, Graphy.interval.day);
+		var steppedMS = Graphy.interval.stepDate(date, Graphy.interval.day);
 		var expectedSteppedDate = new Date(2012, 8, 18, 0, 0, 0, 0);
 		
 		assert.equal(steppedMS, expectedSteppedDate.getTime());
@@ -24,7 +24,7 @@ this.intervalSanity = {
 		var hour = Graphy.interval.hour;
 		var day = Graphy.interval.day;
 		
-		assert.equal(Graphy.interval.bigger_interval(hour), day);
+		assert.equal(Graphy.interval.biggerInterval(hour), day);
 		
 		test.done();
 	}

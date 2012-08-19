@@ -1,10 +1,10 @@
 this.coreSanity = {
 	
 	'setUp': function(callback) {
-		this.graph = Graphy.create_graph({
+		this.graph = Graphy.createGraph({
 			canvas: $('<div></div>'), 
-			x_axis_interval: Graphy.interval.hour, 
-			x_axis_label_formatter: Graphy.formatters.human_date
+			xAxisInterval: Graphy.interval.hour, 
+			xAxisLabelFormatter: Graphy.formatters.humanDate
 		});
 		
 		this.graph.plot(
@@ -25,8 +25,8 @@ this.coreSanity = {
 		callback();
 	},
 	
-	'value_rect': function(test) {
-		var rect = this.graph.value_rect();
+	'valueRect': function(test) {
+		var rect = this.graph.valueRect();
 
 		assert.equal(rect.top, 5);
 		assert.equal(rect.bottom, 1);
