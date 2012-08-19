@@ -68,7 +68,7 @@ var Graphy = {
   //
   create_graph: function(spec) {
     var self = {};
-   
+
     // see: plot, plots, and plot_jsons for accessors
     var _plots = [];
    
