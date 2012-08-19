@@ -1605,15 +1605,16 @@ exports.test = function (name, start, options, callback) {
                     });
                 }
             }
-            if (err) {
-                var a2 = exports.assertion({error: err});
-                a_list.push(a2);
-                if (options.log) {
-                    async.nextTick(function () {
-                        options.log(a2);
-                    });
-                }
+
+            var a2 = exports.assertion({error: err});
+            a_list.push(a2);
+
+            if (err && options.log) {
+                async.nextTick(function () {
+                    options.log(a2);
+                });
             }
+
             var end = new Date().getTime();
             async.nextTick(function () {
                 var assertion_list = exports.assertionList(a_list, end - start);
@@ -1842,7 +1843,6 @@ exports.runModules = function (modules, opt) {
     var all_assertions = [];
     var options = types.options(opt);
     var start = new Date().getTime();
-
     async.concatSeries(_keys(modules), function (k, cb) {
         exports.runModule(k, modules[k], options, cb);
     },
