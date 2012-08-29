@@ -1,0 +1,6 @@
+---
+  - 'lib/jquery-1.7.2.min.js'
+  - 'lib/underscore-1.3.3.min.js'
+  - 'lib/jquery.createcanvas.js'
+  - './graphy.js'
+# extra line required due to bug with yaml peek()
