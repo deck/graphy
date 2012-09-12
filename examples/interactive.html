@@ -40,22 +40,15 @@
 			};
 		}
 		
-		var series = seriesFromForm();
-		g.xAxisInterval(Graphy.interval.biggerInterval(series[1][0] - series[0][0]));
-		
-		var plot = g.plot(
-			series, 
-			optionsFromForm()
-		);
-		
-		g.draw();
-		
 		var updateGraph = function() {
-			_.extend(plot.options, optionsFromForm());
-			plot.data = seriesFromForm();
+			g.clear();
+			var series = seriesFromForm();
+			g.plot(series, optionsFromForm());
 			g.xAxisInterval(Graphy.interval.biggerInterval(series[1][0] - series[0][0]));
 			g.draw();
 		}
+		
+		updateGraph();
 		
 		$form.change(function(evt) {
 			updateGraph();

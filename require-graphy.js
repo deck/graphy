@@ -647,7 +647,7 @@ var Graphy = {
         if ( !_valueRect ) {
           _valueRect = Graphy.util.createRect( {left: dp[0], right: dp[0], bottom: dp[1], top: dp[1]} );
         } else {
-          _valueRect.recalculateWithPoint( dp );
+          _valueRect.recalculateWithPoint(dp);
         }
        
         var yUnitOption = options['unit'] || options['yUnit'];
@@ -1102,19 +1102,17 @@ Graphy.util = {
     return flipped ? (newMax - newMin) - ret + newMin : ret + newMin;
   },
    
+	// accepts either a rectangle {top, bottom, left, right} or array of points that should fit inside the rectangle
   createRect: function(rect) {
-    var newRect = { top: rect && rect.top ? rect.top : 0,
-      right: rect && rect.right ? rect.right : 0,
-      bottom: rect && rect.bottom ? rect.bottom : 0,
-      left: rect && rect.left ? rect.left : 0,
+    var newRect = {
       height: function() { return Math.abs(this.bottom - this.top) },
       width: function() { return Math.abs(this.right - this.left) },
       niceRect: false,
       recalculateWithPoint: function(pt) { // param is 2 dimensional array [x,y]
-        if ( pt[0] < newRect.left ) { newRect.left = pt[0]; }
-        if ( pt[0] > newRect.right ) { newRect.right = pt[0]; }
-        if ( pt[1] < newRect.bottom ) { newRect.bottom = pt[1]; }
-        if ( pt[1] > newRect.top ) { newRect.top = pt[1]; }
+        if ( pt[0] < newRect.left || newRect.left == undefined ) { newRect.left = pt[0]; }
+        if ( pt[0] > newRect.right || newRect.right == undefined ) { newRect.right = pt[0]; }
+        if ( pt[1] < newRect.bottom || newRect.bottom == undefined ) { newRect.bottom = pt[1]; }
+        if ( pt[1] > newRect.top || newRect.top == undefined ) { newRect.top = pt[1]; }
         newRect.recalculateNicePoint();
       },
       recalculateNicePoint: function() {
@@ -1122,14 +1120,25 @@ Graphy.util = {
         newRect.niceRect.bottom = Graphy.util.niceNum(newRect.bottom, true);
         newRect.niceRect.top = Graphy.util.niceNum(newRect.top);
 
-        if(newRect.niceRect.top == newRect.niceRect.bottom){
- 	  newRect.niceRect.top = newRect.niceRect.bottom + 1;
-	}  
+        if (newRect.niceRect.top == newRect.niceRect.bottom) {
+ 	  			newRect.niceRect.top = newRect.niceRect.bottom + 1;
+				}
       },
       toString: function() {
         return "{top:" + this.top + ", bottom:" + this.bottom + ", left:" + this.left + ", right:" + this.right + "}";
       }
     };
+
+		if (_.isArray(rect)) {
+			_.each(rect, function(pt) { newRect.recalculateWithPoint(pt) });
+		} else {
+			_.extend(newRect, {
+				top: rect && rect.top ? rect.top : 0,
+	    	right: rect && rect.right ? rect.right : 0,
+	    	bottom: rect && rect.bottom ? rect.bottom : 0,
+	    	left: rect && rect.left ? rect.left : 0
+			});
+		}
    
     newRect.recalculateNicePoint();
    

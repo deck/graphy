@@ -646,7 +646,7 @@ var Graphy = {
         if ( !_valueRect ) {
           _valueRect = Graphy.util.createRect( {left: dp[0], right: dp[0], bottom: dp[1], top: dp[1]} );
         } else {
-          _valueRect.recalculateWithPoint( dp );
+          _valueRect.recalculateWithPoint(dp);
         }
        
         var yUnitOption = options['unit'] || options['yUnit'];
