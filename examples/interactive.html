@@ -24,8 +24,8 @@
       var end = new Date($form.find('#end-date').val());
       var points = $form.find('#points').val();
       var interval = (end.getTime() - start.getTime())/points;
-      var min = $form.find('#min').val();
-      var max = $form.find('#max').val();
+      var min = parseFloat($form.find('#min').val());
+      var max = parseFloat($form.find('#max').val());
       
       return _.map(_.range(points), function(num) {
         return [start.getTime() + num * interval, min + (Math.random() * (max-min)) ]
