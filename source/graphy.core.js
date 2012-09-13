@@ -1,16 +1,4 @@
-//
-//
-//    .oooooo.                                  oooo                    
-//   d8P'  `Y8b                                 `888                    
-//  888           oooo d8b  .oooo.   oo.ooooo.   888 .oo.   oooo    ooo 
-//  888           `888""8P `P  )88b   888' `88b  888P"Y88b   `88.  .8'  
-//  888     ooooo  888      .oP"888   888   888  888   888    `88..8'   
-//  `88.    .88'   888     d8(  888   888   888  888   888     `888'    
-//   `Y8bood8P'   d888b    `Y888""8o  888bod8P' o888o o888o     .8'     
-//                                    888                   .o..P'      
-//                                   o888o                  `Y8P'
-//
-// This file is part of Graphy.
+// This file is part of Graphy from DECK Monitoring LLC.
 // 
 // Graphy is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser Public License
 // as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later 
@@ -22,24 +10,6 @@
 // You should have received a copy of the Lesser General Public License along with Graphy. If not, see 
 // <http://www.gnu.org/licenses/>.
 //
-//
-// Say hello to our graphing module. 
-//
-// It has one instantiating function: 
-//   createGraph: This creates a graph on an element and provides you with several functions to work with it.
-// and one array:
-//   graphs: []
-//
-// Each graph has an id (graph.index). This is it's index in the Graphy.graphs[] array.
-//
-// There are also four packages in here:
-//   interval: Millisecond variables for different time intervals (second, minute, etc.)
-//   formatters: Changes number values to text.
-//   renderers: All actual graphics making is handle in here.
-//   util: Common (hopefully useful) graphing functions.
-//  
-//
-
 var Graphy = {
  
 	version: "1.2012.08.15",

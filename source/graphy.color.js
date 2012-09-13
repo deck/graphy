@@ -13,10 +13,9 @@
  *
  *  --
  *
- *  File modified to sit inside Graphy without conflict and support css color names by Joel @ DECK.
+ *  File modified to sit inside Graphy without conflict and support css color names by Joel @ DECK Monitoring LLC.
  *
  */
-
 Graphy.Color = (function() {
 	
 	var Color = {};
