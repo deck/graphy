@@ -1,0 +1,8 @@
+{
+  "name": "graphy",
+  "version": "1.12.0",
+  "license": "LGPL",
+  "dependencies": {
+    "aladdin": "~0.3.2"
+  }
+}
