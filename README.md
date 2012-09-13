@@ -31,9 +31,9 @@ Usage
 We start by creating a blank graph.
 
     var g = Graphy.createGraph({
-    	canvas: '#graph', 
-    	xAxisInterval: Graphy.interval.hour, 
-    	xAxisLabelFormatter: Graphy.formatters.humanDate
+      canvas: '#graph', 
+      xAxisInterval: Graphy.interval.hour, 
+      xAxisLabelFormatter: Graphy.formatters.humanDate
     });
   
 `createGraph` accepts a hash with the following parameters:
@@ -52,16 +52,16 @@ We start by creating a blank graph.
 Next we add a plot to the graph.
 
     g.plot(
-    	[
-    		[new Date(2010,10,28,22), 1],
-    		[new Date(2010,10,28,23), 6],
-    		[new Date(2010,10,29,0), 42]
-    	], 
-    	{ 
-    		renderer: 'bar',
-    		color: 'papayawhip',
-    		unit: 'label'
-    	} 
+      [
+        [new Date(2010,10,28,22), 1],
+        [new Date(2010,10,28,23), 6],
+        [new Date(2010,10,29,0), 42]
+      ], 
+      { 
+        renderer: 'bar',
+        color: 'papayawhip',
+        unit: 'label'
+      } 
     );
 
 And finally, we draw it.

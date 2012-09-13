@@ -24,7 +24,7 @@ Graphy.util = {
     return flipped ? (newMax - newMin) - ret + newMin : ret + newMin;
   },
    
-	// accepts either a rectangle {top, bottom, left, right} or array of points that should fit inside the rectangle
+  // accepts either a rectangle {top, bottom, left, right} or array of points that should fit inside the rectangle
   createRect: function(rect) {
     var newRect = {
       height: function() { return Math.abs(this.bottom - this.top) },
@@ -43,24 +43,24 @@ Graphy.util = {
         newRect.niceRect.top = Graphy.util.niceNum(newRect.top);
 
         if (newRect.niceRect.top == newRect.niceRect.bottom) {
- 	  			newRect.niceRect.top = newRect.niceRect.bottom + 1;
-				}
+          newRect.niceRect.top = newRect.niceRect.bottom + 1;
+        }
       },
       toString: function() {
         return "{top:" + this.top + ", bottom:" + this.bottom + ", left:" + this.left + ", right:" + this.right + "}";
       }
     };
 
-		if (_.isArray(rect)) {
-			_.each(rect, function(pt) { newRect.recalculateWithPoint(pt) });
-		} else {
-			_.extend(newRect, {
-				top: rect && rect.top ? rect.top : 0,
-	    	right: rect && rect.right ? rect.right : 0,
-	    	bottom: rect && rect.bottom ? rect.bottom : 0,
-	    	left: rect && rect.left ? rect.left : 0
-			});
-		}
+    if (_.isArray(rect)) {
+      _.each(rect, function(pt) { newRect.recalculateWithPoint(pt) });
+    } else {
+      _.extend(newRect, {
+        top: rect && rect.top ? rect.top : 0,
+        right: rect && rect.right ? rect.right : 0,
+        bottom: rect && rect.bottom ? rect.bottom : 0,
+        left: rect && rect.left ? rect.left : 0
+      });
+    }
    
     newRect.recalculateNicePoint();
    
