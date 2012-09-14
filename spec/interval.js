@@ -1,3 +1,5 @@
+// Copyright 2010-2012 DECK Monitoring LLC.
+//
 // This file is part of Graphy from DECK Monitoring LLC.
 // 
 // Graphy is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser Public License
@@ -10,7 +12,6 @@
 // You should have received a copy of the Lesser General Public License along with Graphy. If not, see 
 // <http://www.gnu.org/licenses/>.
 //
-
 describe("Graphy.interval", function() {
 
   it ("should floor to the 1st of the month", function() {

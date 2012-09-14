@@ -1,3 +1,5 @@
+// Copyright 2010-2012 DECK Monitoring LLC.
+//
 // This file is part of Graphy from DECK Monitoring LLC.
 // 
 // Graphy is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser Public License

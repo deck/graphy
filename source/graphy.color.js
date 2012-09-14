@@ -1,21 +1,46 @@
 /*
- *  Copyright 2005 Sabre Airline Solutions
- *
- *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
- *  file except in compliance with the License. You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software distributed under the
- *  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- *  either express or implied. See the License for the specific language governing permissions
- *  and limitations under the License.
- *
- *  --
- *
- *  File modified to sit inside Graphy without conflict and support css color names by Joel @ DECK Monitoring LLC.
- *
- */
+*  ATTENTION: 
+*  This file is derived from Rico's src/ricoStyles.js (http://openrico.org/) and 
+*  is modified to sit inside Graphy without conflict and support css color names by Joel 
+*  Birchler @ DECK Monitoring LLC. See the changeset below.
+*
+*  Color.toColorPart is from prototype.js, included in the Rico library, which is the 
+*  Prototype JavaScript framework by Sam Stephenson.
+*
+*  --
+* 
+*  Copyright 2005 Sabre Airline Solutions
+*
+*  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+*  file except in compliance with the License. You may obtain a copy of the License at
+*
+*         http://www.apache.org/licenses/LICENSE-2.0
+*
+*  Unless required by applicable law or agreed to in writing, software distributed under the
+*  License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+*  either express or implied. See the License for the specific language governing permissions
+*  and limitations under the License.
+*
+*  --
+*
+*  Prototype JavaScript framework, version 1.6.0.3
+*  (c) 2005-2008 Sam Stephenson
+*
+*  Prototype is freely distributable under the terms of an MIT-style license.
+*  For details, see the Prototype web site: http://www.prototypejs.org/
+*  
+*  --
+*
+*  CHANGE SET:
+* 
+*  - Wrapped in modular (non-classical OOP) object for use within Graphy without collision.
+*  - RGBColor is a private function derived from Rico.Color.
+*  - Merged in Color.toColorPart from prototype.js.
+*  - Removed Rico.Color.createColorFromBackground, Rico.Color.createGradientV, Rico.Color.
+*    createGradientH, Rico.Color.createGradientContainer, Rico.Color.createColorPath, 
+*    Rico.Color.setColorHue and anything outside of Rico.Color.
+*
+*/
 Graphy.Color = (function() {
   
   var Color = {};
