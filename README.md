@@ -94,7 +94,6 @@ Source Files
 * _graphy.renderers_: All actual graphics should be handled in here.
 * _graphy.util_: Common (hopefully useful) graphing functions.
 
-
 Copyright and License
 =====================
 
@@ -107,3 +106,8 @@ Graphy is distributed in the hope that it will be useful, but WITHOUT ANY WARRAN
 You should have received a copy of the Lesser General Public License along with Graphy. If not, see <http://www.gnu.org/licenses/>.
 
 ![LGPL](http://github.com/deck/graphy/raw/master/lgpl.png) 
+
+Attributions
+============
+
+_source/graphy.color.js_ is derived from Rico and includes a method from Prototype. Rico is copyright 2005 Sabre Airline Solutions and distributed under the Apache License v2.0. Prototype is copyright 2005-2008 Sam Stephenson and distributed under an MIT-style license. See the _source/graphy.color.js_ source file for further details.
