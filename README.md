@@ -11,6 +11,8 @@
 
 A JavaScript canvas graphing library for drawing lines, bars, and scatter plots.
 
+![](http://github.com/deck/graphy/raw/master/screenshot.png)
+
 What You Need
 =============
 
