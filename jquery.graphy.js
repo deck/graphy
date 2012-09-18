@@ -3,7 +3,7 @@ $( function() {
   // Turns a json hash into a simple line graph
   $.fn.sparkline = function() {
     this.each( function(i,el) {
-	var g = Graphy.create_graph( { canvas: el, width: 40, options: { renderer: 'line' }, x_axis_renderer: 'none', y_axis_renderer: 'none', no_hover: true } );
+	var g = Graphy.createGraph( { canvas: el, width: 40, options: { renderer: 'line' }, xAxisRenderer: 'none', yAxisRenderer: 'none', noHover: true } );
     });
   };
   
@@ -11,7 +11,7 @@ $( function() {
   $.fn.graphy = function(spec) {
     this.each( function(i,el) {
       spec.canvas = el;
-      var g = Graphy.create_graph( spec );
+      var g = Graphy.createGraph( spec );
     });
   };
 
