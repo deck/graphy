@@ -7,7 +7,7 @@ $( function() {
     });
   };
   
-  // Creates a graph on the element. See Graphy.create_graph for a description of the spec parameter.
+  // Creates a graph on the element. See Graphy.createGraph for a description of the spec parameter.
   $.fn.graphy = function(spec) {
     this.each( function(i,el) {
       spec.canvas = el;
