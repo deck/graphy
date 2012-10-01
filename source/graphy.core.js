@@ -14,9 +14,9 @@
 //
 var Graphy = {
  
-	version: "1.2012.08.15",
+  version: "1.2012.08.15",
   graphs: [],
-  css_is_ready: false,
+  cssIsReady: false,
  
   //
   // Creates a graph on a canvas element according to a "spec" hash. The hash may contain the following keys:
@@ -50,7 +50,7 @@ var Graphy = {
         _xAxisLabelFormatter, 
         _xAxisInterval,
 		    _vRuleLabel = false,
-        _no_hover,
+        _noHover,
         _options = {};
        
     // have read-only accessors
@@ -75,7 +75,7 @@ var Graphy = {
     var init = function(spec) {
       if ( spec.options ) { self.options(spec.options); }
       if ( spec.canvas ) { self.canvas(spec.canvas); }
-      self.no_hover(true);
+      self.noHover(true);
      
       if ( spec.xAxisInterval ) { self.xAxisInterval(spec.xAxisInterval); }
       if ( spec.xAxisLabelFormatter ) { self.xAxisLabelFormatter(spec.xAxisLabelFormatter); }
@@ -108,7 +108,7 @@ var Graphy = {
     // draws it up if the css is all ready. if not, it waits until it can see it.
     //
     self.draw = function () {
-      if ( Graphy.css_is_ready ) { 
+      if ( Graphy.cssIsReady ) { 
         drawForReal(); 
       } else {
         var $test = $("<div class='graphy_css_loaded' style='display:hidden;'></div>");
@@ -117,7 +117,7 @@ var Graphy = {
         var interval = setInterval( function() {
           if( $test.css('position') == 'absolute' ) {
             clearInterval(interval);
-            Graphy.css_is_ready = true;
+            Graphy.cssIsReady = true;
             drawForReal();
           }
         }, 10 );
@@ -221,7 +221,7 @@ var Graphy = {
         // mouseover and mouseout do not work because the hover line triggers these events continually since the mouse is over that, not the graph area
         // TODO: put this code somewhere else, it should not be inlined here
         $(document).on('mousemove', function(e) {
-          if(self.no_hover()) {
+          if(self.noHover()) {
             return;
           }
           var o = _$canvas.offset();
@@ -409,9 +409,9 @@ var Graphy = {
     //
     // accessor
     //
-    self.no_hover = function( set_no_hover ) {
-      if ( arguments.length ) { _no_hover = set_no_hover; }
-      return _no_hover;
+    self.noHover = function( set_noHover ) {
+      if ( arguments.length ) { _noHover = set_noHover; }
+      return _noHover;
     }
 
     //
@@ -582,7 +582,7 @@ var Graphy = {
       _xUnits = [];
       _yUnits = [];
       selectedPlotCount = 0;
-      self.no_hover(true);
+      self.noHover(true);
      
       _valueRectByUnit = {};
       self.draw();
@@ -680,8 +680,8 @@ var Graphy = {
       };
 
       // only enable hover if a non-bar graph has been added.  hover is disabled when the graph is cleared and this is where it eventually gets enabled.
-      if(!spec.no_hover && Graphy.util.functionByNameOrFunction( options['renderer'], Graphy.renderers ) != Graphy.renderers.bar) {
-        self.no_hover(false);
+      if(!spec.noHover && Graphy.util.functionByNameOrFunction( options['renderer'], Graphy.renderers ) != Graphy.renderers.bar) {
+        self.noHover(false);
       }
      
       _plots.push( p );
@@ -823,7 +823,7 @@ var Graphy = {
         p = plot_or_index;
         i = $.inArray(p, _plots);
       }
-      // TODO: update no_hover() here. it does not appear that this function is being used.
+      // TODO: update noHover() here. it does not appear that this function is being used.
      
       return _plots.splice(i,1)[0];
     }
