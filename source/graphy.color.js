@@ -1,4 +1,9 @@
 /*
+*  Copyright 2005 Sabre Airline Solutions
+*  Copyright 2005-2008 Sam Stephenson
+*
+*  --
+*
 *  ATTENTION: 
 *  This file is derived from Rico's src/ricoStyles.js (http://openrico.org/) and 
 *  is modified to sit inside Graphy without conflict and support css color names by Joel 
