@@ -31,6 +31,7 @@ var Graphy = {
   //        specific. Example: {"width": 2, "color": "red", "unit": "oxen/m³"}
   // xAxisInterval: Specify a fixed interval. See Graphy.interval.
   // xAxisLabelFormatter: Function or string name of function to format label text. See Graphy.formatters.
+  // yAxisLabelFormatter: Function or string name of function to format label text. See Graphy.formatters.
   // xAxisRenderer: Function or string name of function to render x axis. See Graphy.renderers.axis.
   //                  (default: "cleanX")
   // yAxisRenderer: Function or string name of function to render y axis. See Graphy.renderers.axis.
@@ -47,6 +48,7 @@ var Graphy = {
     var _canvas,
         _yAxisRenderer, 
         _xAxisRenderer, 
+        _yAxisLabelFormatter, 
         _xAxisLabelFormatter, 
         _xAxisInterval,
 		    _vRuleLabel = false,
@@ -79,6 +81,7 @@ var Graphy = {
      
       if ( spec.xAxisInterval ) { self.xAxisInterval(spec.xAxisInterval); }
       if ( spec.xAxisLabelFormatter ) { self.xAxisLabelFormatter(spec.xAxisLabelFormatter); }
+      if ( spec.yAxisLabelFormatter ) { self.yAxisLabelFormatter(spec.yAxisLabelFormatter); }
       if ( spec.xAxisRenderer ) { self.xAxisRenderer(spec.xAxisRenderer); }
       if ( spec.yAxisRenderer ) { self.yAxisRenderer(spec.yAxisRenderer); }
       if ( spec.vRuleLabel ) { self.vRuleLabel(spec.vRuleLabel); }
@@ -149,12 +152,12 @@ var Graphy = {
       _ctx.clearRect(0, 0, _canvas.width, _canvas.height);
       $(".graphy_axis_label_" + _index).remove();
 
-      if (_plots.length > 0) {        
+      if (_plots.length > 0) {
         // draw the axis (order is important here)
         if ( !_yAxisRenderer ) { _yAxisRenderer = Graphy.renderers.axis.cleanY; }
         if ( !_xAxisRenderer ) { _xAxisRenderer = Graphy.renderers.axis.cleanX; }
         _yAxisRenderer( "measure", self );
-        _xAxisRenderer( "measure", self );        
+        _xAxisRenderer( "measure", self );
         _yAxisRenderer( "draw", self );
         _xAxisRenderer( "draw", self );
        
@@ -163,7 +166,7 @@ var Graphy = {
           indexByPlot = {};
         $.map(_plots, function(el,i) { indexByPlot[el] = i; });
 
-        _plots = _plots.sort(function(a,b){ 
+        _plots = _plots.sort(function(a,b){
           // both bars or neither bars
           if((a.options.renderer == 'bar') == (b.options.renderer == 'bar'))
             return indexByPlot[a] - indexByPlot[b];
@@ -176,10 +179,10 @@ var Graphy = {
         for (var i = 0; i < _plots.length; i++) {
           options = $.extend({}, _options, _plots[i].options);
           renderer = Graphy.util.functionByNameOrFunction(options.renderer, Graphy.renderers, Graphy.renderers.plot);
-          if (rendererIndexes[renderer] == undefined) rendererIndexes[renderer] = 0;
+          if (rendererIndexes[renderer] === undefined) rendererIndexes[renderer] = 0;
           rendererIndexes[renderer] += 1;
-          renderer(rendererIndexes[renderer], _plots[i].data, options, self);          
-        }      
+          renderer(rendererIndexes[renderer], _plots[i].data, options, self);
+        }
       }
      
       _ctx.restore();
@@ -200,7 +203,7 @@ var Graphy = {
         if(!$target.is('canvas')){
           _$canvas = $target.createCanvas().find('canvas');
         } else {
-          // For non-dynamically created canvas elements, we need to 
+          // For non-dynamically created canvas elements, we need to
           // do some magic for IE 7 & 8 to make them usable with excanvas.
           if (typeof(G_vmlCanvasManager) != 'undefined'){
             G_vmlCanvasManager.initElement(_$canvas.get(0));
@@ -426,10 +429,20 @@ var Graphy = {
     // accessor
     //
     self.xAxisLabelFormatter = function( set_xAxisLabelFormatter ) {
-      if ( arguments.length ) { 
-        _xAxisLabelFormatter = Graphy.util.functionByNameOrFunction( set_xAxisLabelFormatter, Graphy.formatters ); 
+      if ( arguments.length ) {
+        _xAxisLabelFormatter = Graphy.util.functionByNameOrFunction( set_xAxisLabelFormatter, Graphy.formatters );
       }
       return _xAxisLabelFormatter;
+    }
+
+    //
+    // accessor
+    //
+    self.yAxisLabelFormatter = function( set_yAxisLabelFormatter ) {
+      if ( arguments.length ) {
+        _yAxisLabelFormatter = Graphy.util.functionByNameOrFunction( set_yAxisLabelFormatter, Graphy.formatters );
+      }
+      return _yAxisLabelFormatter;
     }
    
     //
@@ -437,7 +450,7 @@ var Graphy = {
     //
     self.xAxisRenderer = function( set_xAxisRenderer ) {
       if ( arguments.length ) {
-        _xAxisRenderer = Graphy.util.functionByNameOrFunction( set_xAxisRenderer, Graphy.renderers.axis ); 
+        _xAxisRenderer = Graphy.util.functionByNameOrFunction( set_xAxisRenderer, Graphy.renderers.axis );
       }
       return _xAxisRenderer;
     }
@@ -664,19 +677,19 @@ var Graphy = {
       p.remove = function() { return self.removePlot(p); };
       p.select = function() { 
         if ( !p.options['selected'] ) {
-          p.options['selected'] = true; 
+          p.options['selected'] = true;
           selectedPlotCount++;
         }
-        self.draw(); 
-        return p; 
+        self.draw();
+        return p;
       };
-      p.unselect = p.deselect = function() { 
+      p.unselect = p.deselect = function() {
         if ( p.options['selected'] ) {
-          p.options['selected'] = false; 
+          p.options['selected'] = false;
           selectedPlotCount--;
         }
-        self.draw(); 
-        return p; 
+        self.draw();
+        return p;
       };
 
       // only enable hover if a non-bar graph has been added.  hover is disabled when the graph is cleared and this is where it eventually gets enabled.
