@@ -13,8 +13,10 @@
   $(function() {
     var g = Graphy.createGraph({
       canvas: '#graph', 
-      xAxisInterval: Graphy.interval.hour, 
-      xAxisLabelFormatter: Graphy.formatters.humanDate
+      xAxisLabelFormatter: Graphy.formatters.shortDate,
+      yAxisLabelFormatter: Graphy.formatters.usMoney,
+      xAxisRenderer: 'cleanX',
+      yAxisRenderer: 'cleanY',
     });
     
     g.plot(
@@ -30,8 +32,8 @@
       ], 
       { 
         renderer: 'line',
-        color: 'red',
-        unit: 'label'
+        color: 'salmon',
+        unit: 'unit 3'
       } 
     );
     
@@ -47,9 +49,35 @@
         [new Date(2010,10,8), 3]
       ], 
       { 
-        renderer: 'line',
-        color: 'green',
-        unit: 'label'
+        renderer: 'dashedLine',
+            width: 2,
+            //lineCap: 'round', // rounds the caps of the lines.  With a dashed line this can give the appearance of circles.
+            opacity: 1,
+            color: 'skyblue',
+            unit: 'unit 3',
+            dashPattern: [5, 10, 2, 4] // The pattern for dashes.  5 pixel line, 10 pixel blank, 2 pixel line, 4 pixel blank (doesn't take the line width into account so may need to be adjusted for larger line widths)
+      } 
+    );
+
+    g.plot(
+      [
+        [new Date(2010,10,1), 5],
+        [new Date(2010,10,2), 4],
+        [new Date(2010,10,3), 2],
+        [new Date(2010,10,4), 6],
+        [new Date(2010,10,5), 3],
+        [new Date(2010,10,6), 7],
+        [new Date(2010,10,7), 7],
+        [new Date(2010,10,8), 2]
+      ], 
+      { 
+        renderer: 'doubleLine',
+            width: 10,
+            lineCap: 'square',
+            lineJoin: 'round',
+            opacity: 1,
+            color: 'green',
+            unit: 'unit 3'
       } 
     );
     
