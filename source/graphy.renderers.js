@@ -1,15 +1,15 @@
 // Copyright 2010-2012 DECK Monitoring LLC.
 //
 // This file is part of Graphy from DECK Monitoring LLC.
-// 
+//
 // Graphy is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser Public License
-// as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later 
+// as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
 // version.
 //
 // Graphy is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser Public License for more details.
 //
-// You should have received a copy of the Lesser General Public License along with Graphy. If not, see 
+// You should have received a copy of the Lesser General Public License along with Graphy. If not, see
 // <http://www.gnu.org/licenses/>.
 //
 Graphy.renderers = {
@@ -29,23 +29,23 @@ Graphy.renderers = {
       ctx.lineTo( x, y + 2 );
     }
    
-    ctx.stroke();      
+    ctx.stroke();
     ctx.restore();
    
     if ( graph.vRuleLabel() ) {
       // FIXME: label should not be in the axis module at this point
       Graphy.renderers.axis.label( Graphy.formatters.humanDate(value, precision),
-        x + 15, 
-        57, 
+        x + 15,
+        57,
         graph,
-        "graphy_vRuleLabel", 
+        "graphy_vRuleLabel",
         null,
         "left" );
     }
   },
  
   plot: function(index, data, options, graph) {
-    var ctx = graph.ctx(), 
+    var ctx = graph.ctx(),
         valueRect = options['unit'] ? graph.valueRectByUnit(options['unit']).niceRect : graph.valueRect().niceRect,
         graphRect = graph.graphRect(),
         x,
@@ -68,38 +68,43 @@ Graphy.renderers = {
    
     ctx.restore();
   },
- 
-  line: function(index, data, options, graph) {
+
+  line: function(index, data, options, graph, overrides) {
     if ( data.length == 1 ) {
       return Graphy.renderers.plot( index, data, options, graph );
     }
+
+    overrides = overrides || {};
    
-    var ctx = graph.ctx(), 
-        valueRect = options['unit'] ? graph.valueRectByUnit(options['unit']).niceRect : graph.valueRect().niceRect, 
+    var ctx = graph.ctx(),
+        valueRect = options['unit'] ? graph.valueRectByUnit(options['unit']).niceRect : graph.valueRect().niceRect,
         graphRect = graph.graphRect(),
         x,
         y,
         rgb = Graphy.Color.create(options.color || "gray").rgb,
-        alpha = !graph.hasSelectedItems() || options['selected'] ? 1 : 0.2;
+        alpha = !graph.hasSelectedItems() || options['selected'] ? overrides.opacity || options.opacity || 1 : 0.2;
    
     ctx.save();
     ctx.beginPath();
     ctx.strokeStyle = 'rgba('+rgb.r+', '+rgb.g+', '+rgb.b+', '+alpha+')';
-    ctx.lineWidth = options.width || 1;
+    ctx.lineCap = overrides.lineCap || options.lineCap || "round";
+    ctx.lineJoin = overrides.lineJoin || options.lineJoin || "round";
+    ctx.lineWidth = overrides.width || options.width || 1;
    
     for ( var j = 0; j < data.length; j++ ) {
       x = Graphy.util.applyValueToNewRatio(data[j][0], valueRect.left, valueRect.right, graphRect.left, graphRect.right) + 0.5;
       y = Graphy.util.applyValueToNewRatio(data[j][1], valueRect.bottom, valueRect.top, graphRect.top, graphRect.bottom, true) + 0.5;
       j ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
     }
+
     ctx.stroke();
-   
     ctx.restore();
+   
   },
  
   bar: function(index, data, options, graph) {
     var ctx = graph.ctx(),
-        valueRect = options['unit'] ? graph.valueRectByUnit(options['unit']).niceRect : graph.valueRect().niceRect, 
+        valueRect = options['unit'] ? graph.valueRectByUnit(options['unit']).niceRect : graph.valueRect().niceRect,
         graphRect = graph.graphRect(),
         x,
         y,
@@ -110,12 +115,12 @@ Graphy.renderers = {
         top_color = options['color'] || "gray",
         bottom_color = top_color,
         gradient,
-        alpha = !graph.hasSelectedItems() || options['selected'] ? 1 : 0.2;
+        alpha = !graph.hasSelectedItems() || options['selected'] ? options.opacity || 1 : 0.2;
 
-    var precision = Graphy.util.calculatePrecision(valueRect.bottom, valueRect.top)
+    var precision = Graphy.util.calculatePrecision(valueRect.bottom, valueRect.top);
 
-    bottomRGB = Graphy.Color.create(top_color).darken(.1).rgb;
-    topRGB = Graphy.Color.create(top_color).brighten(.05).rgb;
+    bottomRGB = Graphy.Color.create(top_color).darken(0.1).rgb;
+    topRGB = Graphy.Color.create(top_color).brighten(0.05).rgb;
 
     ctx.save();
     ctx.beginPath();
@@ -140,7 +145,97 @@ Graphy.renderers = {
    
     ctx.restore();
   },
- 
+
+  doubleLine: function(index, data, options, graph) {
+    if ( data.length == 1 ) {
+      return Graphy.renderers.plot( index, data, options, graph, {width: 1} );
+    }
+
+    Graphy.renderers.line(index, data, options, graph, {width:1});
+
+    if(options.width === undefined || options.width < 5) {
+      options.width = 5;
+    }
+    var alpha = (options.opacity == 1) ? 0.3 : 0.1;
+    Graphy.renderers.line(index, data, options, graph, {opacity:alpha});
+
+  },
+
+  dashedLine: function(index, data, options, graph, overrides) {
+    if ( data.length == 1 ) {
+      return Graphy.renderers.plot( index, data, options, graph );
+    }
+
+    overrides = overrides || {};
+   
+    var ctx = graph.ctx(),
+        valueRect = options['unit'] ? graph.valueRectByUnit(options['unit']).niceRect : graph.valueRect().niceRect,
+        graphRect = graph.graphRect(),
+        x,
+        y,
+        rgb = Graphy.Color.create(options.color || "gray").rgb,
+        alpha = !graph.hasSelectedItems() || options['selected'] ? overrides.opacity || options.opacity || 1 : 0.2;
+   
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba('+rgb.r+', '+rgb.g+', '+rgb.b+', '+alpha+')';
+    ctx.lineCap = overrides.lineCap || options.lineCap || "square";
+    ctx.lineJoin = overrides.lineJoin || options.lineJoin || "miter";
+    ctx.lineWidth = overrides.width || options.width || 1;
+
+    var dashedLineTo = function (ctx, fromX, fromY, toX, toY, pattern) {
+      var lt = function (a, b) { return a <= b; };
+      var gt = function (a, b) { return a >= b; };
+      var capmin = function (a, b) { return Math.min(a, b); };
+      var capmax = function (a, b) { return Math.max(a, b); };
+
+      var checkX = { atLineEnd: gt, cap: capmin };
+      var checkY = { atLineEnd: gt, cap: capmin };
+
+      if (fromY - toY > 0) {
+        checkY.atLineEnd = lt;
+        checkY.cap = capmax;
+      }
+      if (fromX - toX > 0) {
+        checkX.atLineEnd = lt;
+        checkX.cap = capmax;
+      }
+
+      ctx.moveTo(fromX, fromY);
+      
+      var offsetX = fromX;
+      var offsetY = fromY;
+      var index = 0, dash = true;
+      while (!(checkX.atLineEnd(offsetX, toX) && checkY.atLineEnd(offsetY, toY))) {
+        var ang = Math.atan2(toY - fromY, toX - fromX);
+        var len = pattern[index % pattern.length];
+        offsetX = checkX.cap(toX, offsetX + (Math.cos(ang) * len));
+        offsetY = checkY.cap(toY, offsetY + (Math.sin(ang) * len));
+        if (dash) {
+          ctx.lineTo(offsetX, offsetY);
+        }
+
+        else ctx.moveTo(offsetX, offsetY);
+
+        index++;
+
+        dash = !dash;
+      }
+    };
+
+    var lastX, lastY, pattern = overrides.dashPattern || options.dashPattern || [5, 3];
+    for ( var j = 0, len = data.length; j < len; j++ ) {
+      x = Graphy.util.applyValueToNewRatio(data[j][0], valueRect.left, valueRect.right, graphRect.left, graphRect.right) + 0.5;
+      y = Graphy.util.applyValueToNewRatio(data[j][1], valueRect.bottom, valueRect.top, graphRect.top, graphRect.bottom, true) + 0.5;
+      j ? dashedLineTo(ctx, lastX, lastY, x, y, pattern) : ctx.moveTo(x, y);
+      lastX = x;
+      lastY = y;
+    }
+
+    ctx.stroke();
+    ctx.restore();
+  },
+
   axis: {
    
     none: function(action, graph) {
@@ -151,10 +246,10 @@ Graphy.renderers = {
     // just the facts (text)
     //
     cleanX: function(action, graph) {
-      var $canvas = graph.$canvas(), 
-          ctx = graph.ctx(), 
-          valueRect = graph.valueRect().niceRect, 
-          graphRect = graph.graphRect(), 
+      var $canvas = graph.$canvas(),
+          ctx = graph.ctx(),
+          valueRect = graph.valueRect().niceRect,
+          graphRect = graph.graphRect(),
           xAxisInterval = graph.xAxisInterval(),
           xAxisLabelFormatter = graph.xAxisLabelFormatter();
      
@@ -174,10 +269,10 @@ Graphy.renderers = {
     // text with a horizontal bottom line
     //
     lineX: function(action, graph) {
-      var $canvas = graph.$canvas(), 
-          ctx = graph.ctx(), 
-          valueRect = graph.valueRect().niceRect, 
-          graphRect = graph.graphRect(), 
+      var $canvas = graph.$canvas(),
+          ctx = graph.ctx(),
+          valueRect = graph.valueRect().niceRect,
+          graphRect = graph.graphRect(),
           xAxisInterval = graph.xAxisInterval(),
           xAxisLabelFormatter = graph.xAxisLabelFormatter();
      
@@ -208,10 +303,10 @@ Graphy.renderers = {
     // simple horizontal line with ticks for each plot.
     //
     scatterX: function(action, graph) {
-      var $canvas = graph.$canvas(), 
-          ctx = graph.ctx(), 
-          valueRect = graph.valueRect().niceRect, 
-          graphRect = graph.graphRect(), 
+      var $canvas = graph.$canvas(),
+          ctx = graph.ctx(),
+          valueRect = graph.valueRect().niceRect,
+          graphRect = graph.graphRect(),
           xAxisInterval = graph.xAxisInterval(),
           xAxisLabelFormatter = graph.xAxisLabelFormatter();
      
@@ -222,7 +317,7 @@ Graphy.renderers = {
         // kick off drawing
         ctx.save();
         ctx.lineWidth = 1;
-        ctx.strokeStyle = "#ddd";        
+        ctx.strokeStyle = "#ddd";
        
         // long axis line
         ctx.beginPath();
@@ -248,11 +343,11 @@ Graphy.renderers = {
     // simple horizontal lines with a dark bottom line
     //
     cleanY: function(action, graph) {
-      var $canvas = graph.$canvas(), 
-          ctx = graph.ctx(), 
-          valueRect = graph.valueRect().niceRect, 
+      var $canvas = graph.$canvas(),
+          ctx = graph.ctx(),
+          valueRect = graph.valueRect().niceRect,
           graphRect = graph.graphRect(),
-          axis_pad = graph.yUnits().length ? 24 : 0;     
+          axis_pad = graph.yUnits().length ? 24 : 0;
      
       if ( action == "measure" ) {
         graphRect.left = axis_pad;
@@ -291,9 +386,9 @@ Graphy.renderers = {
     // simple vertical line
     //
     lineY: function(action, graph) {
-      var $canvas = graph.$canvas(), 
-          ctx = graph.ctx(), 
-          valueRect = graph.valueRect().niceRect, 
+      var $canvas = graph.$canvas(),
+          ctx = graph.ctx(),
+          valueRect = graph.valueRect().niceRect,
           graphRect = graph.graphRect(),
           axis_pad = graph.yUnits().length ? 24 : 0;
      
@@ -321,6 +416,35 @@ Graphy.renderers = {
      
       return graphRect;
     },
+
+    //
+    // simple vertical line only (no text)
+    //
+    lineOnlyY: function(action, graph) {
+      var $canvas = graph.$canvas(),
+          ctx = graph.ctx(),
+          valueRect = graph.valueRect().niceRect,
+          graphRect = graph.graphRect(),
+          axis_pad = 0;
+     
+      if ( action == "measure" ) {
+        graphRect.left = axis_pad;
+        graphRect.top = 16;
+      } else {
+        ctx.save();
+
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.strokeStyle = "#ddd";
+        ctx.moveTo(graphRect.left, graphRect.top - 1);
+        ctx.lineTo(graphRect.left, graphRect.bottom + 1);
+        ctx.stroke();
+       
+        ctx.restore();
+      }
+     
+      return graphRect;
+    },
    
     //
     // simple vertical line with ticks for each plot.
@@ -329,7 +453,7 @@ Graphy.renderers = {
       var graphRect = Graphy.renderers.axis.lineY(action, graph);
      
       if ( action == "draw" ) {
-        var $canvas = graph.$canvas(), 
+        var $canvas = graph.$canvas(),
             ctx = graph.ctx(),
             valueRect = graph.valueRect().niceRect;
        
@@ -343,15 +467,15 @@ Graphy.renderers = {
     },
    
     scatterTicks: function(graph) {
-      var $canvas = graph.$canvas(), 
+      var $canvas = graph.$canvas(),
           ctx = graph.ctx(),
-          valueRect = graph.valueRect().niceRect, 
+          valueRect = graph.valueRect().niceRect,
           graphRect = graph.graphRect();
      
       // kick off drawing
       ctx.save();
       ctx.lineWidth = 1;
-      ctx.strokeStyle = "#ddd";        
+      ctx.strokeStyle = "#ddd";
       ctx.beginPath();
      
       // go through all of the plots and draw a tick at each y
@@ -379,7 +503,7 @@ Graphy.renderers = {
       ctx.restore();
     },
    
-    label: function(val, x, y, graph, styleName, formatter, align, color, opacity) {	
+    label: function(val, x, y, graph, styleName, formatter, align, color, opacity) {
       var $canvas = graph.$canvas();
       var left = Math.round($canvas.offset().left + x);
       var top = Math.round($canvas.offset().top + y);
@@ -392,14 +516,14 @@ Graphy.renderers = {
       if ( formatter ) { val = formatter(val); }
      
       $el = $("<p class='"+styleName+" graphy_axis_label graphy_axis_label_"+graph.index()+"' style='"+ ( color ? 'color:' + color + '; ' : '' ) + ( opacity ? 'opacity:' + opacity + '; ' : '' ) + "'>" + val + "</p>");
-      $el.css({position:'absolute','z-index':1000}).prependTo('body').addClass('graphy');
-     
+      $el.css({position:'absolute','z-index':1000}).appendTo($canvas.parent()).addClass('graphy');
+
       switch ( align ) {
         case "center":
           left -= $el.width()/2;
           break;
         case "vertical_center":
-          top += $el.width()/2;
+          top += $el.height()/2;
           break;
         case "right":
           left -= $el.width();
@@ -417,20 +541,20 @@ Graphy.renderers = {
     unitLabels: function(axis, graph) {
       var units = graph.units(axis),
         $canvas = graph.$canvas(),
-        unit_i = units.length, 
-        axis_label = "", 
-        unit, 
+        unit_i = units.length,
+        axis_label = "",
+        unit,
         open_color_tag = false;
        
       while ( unit_i-- ) {
         unit = units[unit_i];
        
-        if ( unit['color'] && units.length > 1 ) { 
+        if ( unit['color'] && units.length > 1 ) {
           axis_label += "<font style='color:"+unit['color']+"'>";
           open_color_tag = true;
         }
         axis_label += unit['label'];
-        if ( open_color_tag ) { 
+        if ( open_color_tag ) {
           axis_label += "</font>";
           open_color_tag = false;
         }
@@ -446,62 +570,62 @@ Graphy.renderers = {
       }
     },
    
-    xValueLabels: function(numberOfLabels, xOffset, yOffset, styleName, align, graph) {	
+    xValueLabels: function(numberOfLabels, xOffset, yOffset, styleName, align, graph) {
       var $canvas = graph.$canvas(),
           valueRect = graph.valueRect().niceRect,
           graphRect = graph.graphRect(),
           xAxisInterval = graph.xAxisInterval(),
           xAxisLabelFormatter = graph.xAxisLabelFormatter(),
-          align = align || "center",
           roundV, labels_to_draw = {};
 
-      if (!valueRect.width() > 0) {
+      align = align || "center";
+
+      if (valueRect.width() < 0) {
         return;
       }
 
       if ( !xAxisInterval || xAxisInterval < Graphy.interval.hour ) { xAxisInterval = Graphy.interval.hour; }
 
       var biggerInterval = Graphy.interval.biggerInterval(xAxisInterval);
-      var left = xAxisLabelFormatter == Graphy.formatters.humanDate ?  Graphy.interval.floor(valueRect.left, biggerInterval).getTime() : valueRect.left;
+      var left = xAxisLabelFormatter == Graphy.formatters.humanDate || xAxisLabelFormatter == Graphy.formatters.shortDate ?  Graphy.interval.floor(valueRect.left, biggerInterval).getTime() : valueRect.left;
       var labelCount = 0;
 
-      if ( xAxisInterval > Graphy.interval.hour && xAxisLabelFormatter == Graphy.formatters.humanDate ) {
+      if ( xAxisInterval > Graphy.interval.hour && (xAxisLabelFormatter == Graphy.formatters.humanDate || xAxisLabelFormatter == Graphy.formatters.shortDate)) {
         // step by nice dates
         var stepIncrement = Math.ceil(((valueRect.right - valueRect.left)/xAxisInterval)/numberOfLabels);
        
-        for ( ms = left; 
-              ms <= valueRect.right; 
+        for ( ms = left;
+              ms <= valueRect.right;
               ms = Graphy.interval.stepDate(ms, xAxisInterval, stepIncrement) ) {
 
-          roundV = Math.round( Graphy.util.applyValueToNewRatio( ms, 
+          roundV = Math.round( Graphy.util.applyValueToNewRatio( ms,
             valueRect.left,
-            valueRect.right, 
-            graphRect.left, 
+            valueRect.right,
+            graphRect.left,
             graphRect.right ) );
-
-          if (roundV > 16 && !labels_to_draw[ms]) { 
-            labels_to_draw[ms] = {x: roundV, text: Graphy.formatters.humanDate(ms, xAxisInterval)}; 
+          if (roundV > 16 && !labels_to_draw[ms]) {
+            labels_to_draw[ms] = {x: roundV, text: xAxisLabelFormatter(ms, xAxisInterval)};
           }
          
-          labelCount++; 
+          labelCount++;
         }
        
       } else {
-        // raw-style 
+        // raw-style
         // first pass with the bigger interval
-        if ( xAxisLabelFormatter == Graphy.formatters.humanDate ) {
-          for ( var ms = left; 
-                ms <= valueRect.right; 
+        if ( xAxisLabelFormatter == Graphy.formatters.humanDate || xAxisLabelFormatter == Graphy.formatters.shortDate) {
+          for ( var ms = left;
+                ms <= valueRect.right;
                 ms = Graphy.interval.stepDate(ms, biggerInterval) ) {
 
-            roundV = Math.round( Graphy.util.applyValueToNewRatio( ms, 
+            roundV = Math.round( Graphy.util.applyValueToNewRatio( ms,
               valueRect.left,
-              valueRect.right, 
-              graphRect.left, 
+              valueRect.right,
+              graphRect.left,
               graphRect.right ) );
 
-            if (roundV > 16) { 
-              labels_to_draw[ms] = {x: roundV, text: Graphy.formatters.humanDate(ms, biggerInterval)}; 
+            if (roundV > 16) {
+              labels_to_draw[ms] = {x: roundV, text: xAxisLabelFormatter(ms, biggerInterval)};
               Graphy.renderers.vRule( ms, biggerInterval, graph );
             }
             labelCount++; // include unplotted labels
@@ -510,23 +634,23 @@ Graphy.renderers = {
        
         var precision = Graphy.util.calculatePrecision(valueRect.left, valueRect.right);
 
-        // fill in (1/2, 1/4, 1/8...) until out of labels       
+        // fill in (1/2, 1/4, 1/8...) until out of labels
         for ( var jump = biggerInterval;
               // protect against jump getting so small that left + jump == left
               labelCount*2-1 < numberOfLabels && left + jump > left;
               jump /= 2) {
-          for ( n = left + jump; 
-                n <= valueRect.right; 
+          for ( n = left + jump;
+                n <= valueRect.right;
                 n += jump ) {
                  
-            roundV = Math.round( Graphy.util.applyValueToNewRatio( n, 
+            roundV = Math.round( Graphy.util.applyValueToNewRatio( n,
               valueRect.left,
-              valueRect.right, 
-              graphRect.left, 
+              valueRect.right,
+              graphRect.left,
               graphRect.right ) );
 
-            if (roundV && !labels_to_draw[n]) { 
-              labels_to_draw[n] = {x: roundV, text: xAxisLabelFormatter ? xAxisLabelFormatter(n, xAxisInterval) : n.toPrecision(precision) }; 
+            if (roundV && !labels_to_draw[n]) {
+              labels_to_draw[n] = {x: roundV, text: xAxisLabelFormatter ? xAxisLabelFormatter(n, xAxisInterval) : n.toPrecision(precision) };
               labelCount++;
             }
           }
@@ -535,45 +659,47 @@ Graphy.renderers = {
 
       // actually draw them
       var last_x = -1000;
+      var last_width = -1000;
       _.each( labels_to_draw, function(label) {
-        if ( label.x > last_x + 10 || label.x < last_x - 10 ) { // protect against crowding labels
-          Graphy.renderers.axis.label( 
-            label.text, 
+        if (label.x > last_x + 40 || label.x < last_x - 40) { // protect against crowding labels - changed from 10 to 40 which fixed label crowding
+          Graphy.renderers.axis.label(
+            label.text,
             label.x + xOffset,
-            yOffset, 
-            graph, 
-            styleName, 
-            null, 
+            yOffset,
+            graph,
+            styleName,
+            null,
             align );
           last_x = label.x;
         }
-      });        
+      });
     },
    
     yValueLabels: function(numberOfLabels, xOffset, yOffset, styleName, align, graph) {
       var $canvas = graph.$canvas(),
           graphRect = graph.graphRect(),
-          h, 
-          roundH, 
-          val, 
-          precise, 
-          precision, 
-          $el, 
+          h,
+          roundH,
+          val,
+          precise,
+          precision,
+          $el,
           arrayOf$Els = [],
-          maxLabelWidth, 
+          maxLabelWidth,
           x = graphRect.left,
+          yAxisLabelFormatter = graph.yAxisLabelFormatter(),
           yUnits = graph.yUnits();
      
      
       // this guy puts everything together to make an individual label
       var _yLabel = function(valueRect, x, color) {
-        precision = Graphy.util.calculatePrecision(valueRect.bottom, valueRect.top)
+        precision = Graphy.util.calculatePrecision(valueRect.bottom, valueRect.top);
 
         val = Math.round( Graphy.util.applyValueToNewRatio( h, graphRect.bottom, graphRect.top, valueRect.bottom, valueRect.top ) * 100 ) / 100;
 
         precise = val.toPrecision(precision);
 
-        return Graphy.renderers.axis.label( val == precise ? val : precise, xOffset + x, roundH + yOffset, graph, styleName, null, align, color );
+        return Graphy.renderers.axis.label( val == precise ? val : precise, xOffset + x, roundH + yOffset, graph, styleName, yAxisLabelFormatter, align, color );
       };
      
       // loop through the rows for each unit
@@ -597,13 +723,13 @@ Graphy.renderers = {
         x += Math.ceil(maxLabelWidth) + 15;
       }
      
-      if ( align == "right" ) { 
+      if ( align == "right" ) {
         var numberOf$Els = arrayOf$Els.length;
         for ( var k = 0; k < numberOf$Els; k++ ) {
            arrayOf$Els[k].offset({left: arrayOf$Els[k].offset().left + maxLabelWidth - 5});
         }
       }
       if ( x > graphRect.left ) { graphRect.left = x; }
-    }  
+    }
   }
 }
