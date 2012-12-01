@@ -16,7 +16,9 @@ Graphy.interval = {
   second: 1000,
   minute: 60000,
   hour: 60000 * 60,
+  hours2: 60000 * 60 * 2,
   day: 60000 * 60 * 24,
+  days2: 60000 * 60 * 24 * 2,
   week: 60000 * 60 * 24 * 7,
   month: 60000 * 60 * 24 * 28,
   year: 60000 * 60 * 24 * 365,
@@ -28,7 +30,9 @@ Graphy.interval = {
      case Graphy.interval.second: s = "second"; break;
      case Graphy.interval.minute: s = "minute"; break;
      case Graphy.interval.hour: s = "hour"; break;
+     case Graphy.interval.hours2: s = "hour"; break;
      case Graphy.interval.day: s = "day"; break;
+     case Graphy.interval.days2: s = "2days"; break;
      case Graphy.interval.week: s = "week"; break;
      case Graphy.interval.month: s = "month"; break;
      case Graphy.interval.year: s = "year"; break;
@@ -43,7 +47,9 @@ Graphy.interval = {
     if (stepInterval > Graphy.interval.second) { d.setSeconds(0); }
     if (stepInterval > Graphy.interval.minute) { d.setMinutes(0); }
     if (stepInterval > Graphy.interval.hour) { d.setHours(0); }
+    if (stepInterval > Graphy.interval.hours2) { d.setHours(0); }
     if (stepInterval > Graphy.interval.day) { d.setDate(1); }
+    if (stepInterval > Graphy.interval.days2) { d.setDate(1); }
     if (stepInterval > Graphy.interval.month) { d.setMonth(0); }
    
     return d;
@@ -54,6 +60,7 @@ Graphy.interval = {
    
     switch ( stepInterval ) {
       case Graphy.interval.day:
+      case Graphy.interval.days2:
         getSetFuncName = "Date";
         break;
       case Graphy.interval.month:
@@ -79,7 +86,7 @@ Graphy.interval = {
   },
  
   biggerInterval: function( interval ) {
-    var sortedList = [Graphy.interval.second, Graphy.interval.minute, Graphy.interval.hour, Graphy.interval.day, Graphy.interval.month, Graphy.interval.year]
+    var sortedList = [Graphy.interval.second, Graphy.interval.minute, Graphy.interval.hour, Graphy.interval.hours2, Graphy.interval.day, Graphy.interval.days2, Graphy.interval.month, Graphy.interval.year]
    
     for ( var i = 0; i < sortedList.length; i++ ) {
       if ( interval < sortedList[i] ) { return sortedList[i]; }
