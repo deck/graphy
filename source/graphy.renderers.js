@@ -257,7 +257,7 @@ Graphy.renderers = {
         graphRect.bottom = $canvas.height() - 24 - ( graph.xUnits().length ? 20 : 0 );
         graphRect.right = $canvas.width() - 14;
       } else {
-        var numberOfLabels = Math.max( Math.floor( ( graphRect.right - graphRect.left ) / 140 ) + 1, 2 );
+        var numberOfLabels = Math.max( Math.floor( ( graphRect.right - graphRect.left ) / 72 ) + 1, 2 );
         Graphy.renderers.axis.xValueLabels( numberOfLabels, 0, graphRect.bottom + 10, "graphy_axis_line_x_value_label", "center", graph );
         Graphy.renderers.axis.unitLabels( "x", graph );
       }
@@ -576,6 +576,7 @@ Graphy.renderers = {
           graphRect = graph.graphRect(),
           xAxisInterval = graph.xAxisInterval(),
           xAxisLabelFormatter = graph.xAxisLabelFormatter(),
+          drawVRule = graph.drawVRule(),
           roundV, labels_to_draw = {};
 
       align = align || "center";
@@ -626,7 +627,9 @@ Graphy.renderers = {
 
             if (roundV > 16) {
               labels_to_draw[ms] = {x: roundV, text: xAxisLabelFormatter(ms, biggerInterval)};
-              Graphy.renderers.vRule( ms, biggerInterval, graph );
+              if(drawVRule) {
+                Graphy.renderers.vRule( ms, biggerInterval, graph );
+              }
             }
             labelCount++; // include unplotted labels
           }
@@ -705,7 +708,7 @@ Graphy.renderers = {
       // loop through the rows for each unit
       for ( var j = 0; j < (yUnits.length || 1); j++ ) {
         maxLabelWidth = 0;
-       
+        console.log(yUnits[j]);
         for ( var i = 0; i < numberOfLabels; i++ ) {
           h = graphRect.bottom - ( i * ( ( graphRect.bottom - graphRect.top ) / ( numberOfLabels - 1 ) ) );
           roundH = Math.round(h);
