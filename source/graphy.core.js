@@ -1,15 +1,15 @@
 // Copyright 2010-2012 DECK Monitoring LLC.
 //
 // This file is part of Graphy from DECK Monitoring LLC.
-// 
+//
 // Graphy is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser Public License
-// as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later 
+// as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
 // version.
 //
 // Graphy is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser Public License for more details.
 //
-// You should have received a copy of the Lesser General Public License along with Graphy. If not, see 
+// You should have received a copy of the Lesser General Public License along with Graphy. If not, see
 // <http://www.gnu.org/licenses/>.
 //
 var Graphy = {
@@ -20,7 +20,7 @@ var Graphy = {
  
   //
   // Creates a graph on a canvas element according to a "spec" hash. The hash may contain the following keys:
-  // 
+  //
   // canvas [required]: Selector for a canvas element or any other html element (which will be transformed
   //                    into a canvas). If this contains text, Graphy will assign this text to plot_json in
   //                    the spec.
@@ -36,6 +36,7 @@ var Graphy = {
   //                  (default: "cleanX")
   // yAxisRenderer: Function or string name of function to render y axis. See Graphy.renderers.axis.
   //                  (default: "cleanY")
+  // drawVRule: Boolean to true vertical rules or not if necessary
   //
   //
   createGraph: function(spec) {
@@ -46,18 +47,19 @@ var Graphy = {
    
     // have read/write accessors
     var _canvas,
-        _yAxisRenderer, 
-        _xAxisRenderer, 
-        _yAxisLabelFormatter, 
-        _xAxisLabelFormatter, 
+        _yAxisRenderer,
+        _xAxisRenderer,
+        _yAxisLabelFormatter,
+        _xAxisLabelFormatter,
         _xAxisInterval,
-		    _vRuleLabel = false,
+        _vRuleLabel = false,
+        _drawVRule = true,
         _noHover,
         _options = {};
        
     // have read-only accessors
     var _$canvas,
-        _ctx, 
+        _ctx,
         _index = Graphy.graphs.push(self) - 1,
         _valueRect = false,
         _graphRect = false,
@@ -72,7 +74,7 @@ var Graphy = {
         _hoverLineCtx;
    
     //
-    // gets the canvas and context and calls any spec'd functions 
+    // gets the canvas and context and calls any spec'd functions
     //
     var init = function(spec) {
       if ( spec.options ) { self.options(spec.options); }
@@ -84,7 +86,8 @@ var Graphy = {
       if ( spec.yAxisLabelFormatter ) { self.yAxisLabelFormatter(spec.yAxisLabelFormatter); }
       if ( spec.xAxisRenderer ) { self.xAxisRenderer(spec.xAxisRenderer); }
       if ( spec.yAxisRenderer ) { self.yAxisRenderer(spec.yAxisRenderer); }
-      if ( spec.vRuleLabel ) { self.vRuleLabel(spec.vRuleLabel); }
+      if ( spec.vRuleLabel !== undefined) { self.vRuleLabel(spec.vRuleLabel); }
+      if ( spec.drawVRule !== undefined) { self.drawVRule(spec.drawVRule); }
      
       if ( spec['plot'] ) { self.plot(spec['plot']); }
       if ( spec['plots'] ) { self.plots(spec['plots']); }
@@ -111,8 +114,8 @@ var Graphy = {
     // draws it up if the css is all ready. if not, it waits until it can see it.
     //
     self.draw = function () {
-      if ( Graphy.cssIsReady ) { 
-        drawForReal(); 
+      if ( Graphy.cssIsReady ) {
+        drawForReal();
       } else {
         var $test = $("<div class='graphy_css_loaded' style='display:hidden;'></div>");
         $('body').append($test);
@@ -472,6 +475,13 @@ var Graphy = {
       if ( arguments.length ) { _vRuleLabel = set_vRuleLabel; }
       return _vRuleLabel;
     }
+
+    self.drawVRule = function( set_drawVRule ) {
+      if ( arguments.length ) {
+        _drawVRule = Graphy.util.functionByNameOrFunction( set_drawVRule, Graphy.formatters );
+      }
+      return _drawVRule;
+    }
    
     //
     // read-only accessor
@@ -636,7 +646,7 @@ var Graphy = {
        
         var yUnitOption = options['unit'] || options['yUnit'];
         if ( yUnitOption ) {
-          if ( !_valueRectByUnit[yUnitOption] ) { 
+          if ( !_valueRectByUnit[yUnitOption] ) {
             _valueRectByUnit[yUnitOption] = Graphy.util.createRect( {left: dp[0], right: dp[0], bottom: dp[1], top: dp[1]} );
             _yUnits.push( {"label": yUnitOption, "color": options['color']} );
           } else {
@@ -645,7 +655,7 @@ var Graphy = {
         }
        
         if ( options['xUnit'] ) {
-          if ( !_valueRectByUnit[options['xUnit']] ) { 
+          if ( !_valueRectByUnit[options['xUnit']] ) {
             _valueRectByUnit[options['xUnit']] = Graphy.util.createRect( {left: dp[0], right: dp[0], bottom: dp[1], top: dp[1]} );
             _xUnits.push( {"label": options['xUnit'], "color": options['color']} );
           } else {
