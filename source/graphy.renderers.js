@@ -503,10 +503,11 @@ Graphy.renderers = {
       ctx.restore();
     },
    
-    label: function(val, x, y, graph, styleName, formatter, align, color, opacity) {
+    label: function(val, x, y, graph, styleName, formatter, align, color, opacity, className) {
       var $canvas = graph.$canvas();
       var left = Math.round($canvas.offset().left + x);
       var top = Math.round($canvas.offset().top + y);
+      className = className || "";
      
       // stoopid IE6
       if ( $.browser.msie && $.browser.version.charAt(0) == "6" ) {
@@ -516,7 +517,7 @@ Graphy.renderers = {
       if ( formatter ) { val = formatter(val); }
      
       $el = $("<p class='"+styleName+" graphy_axis_label graphy_axis_label_"+graph.index()+"' style='"+ ( color ? 'color:' + color + '; ' : '' ) + ( opacity ? 'opacity:' + opacity + '; ' : '' ) + "'>" + val + "</p>");
-      $el.css({position:'absolute','z-index':1000}).appendTo($canvas.parent()).addClass('graphy');
+      $el.css({position:'absolute','z-index':1000}).appendTo($canvas.parent()).addClass('graphy').addClass(className);
 
       switch ( align ) {
         case "center":
@@ -550,12 +551,13 @@ Graphy.renderers = {
         unit = units[unit_i];
        
         if ( unit['color'] && units.length > 1 ) {
-          axis_label += "<font style='color:"+unit['color']+"'>";
+          // The class is added for selection purposes
+          axis_label += "<span style='color:"+unit['color']+"'>";
           open_color_tag = true;
         }
         axis_label += unit['label'];
         if ( open_color_tag ) {
-          axis_label += "</font>";
+          axis_label += "</span>";
           open_color_tag = false;
         }
         if ( unit_i ) { axis_label += "&nbsp;&nbsp;"; }
@@ -664,7 +666,7 @@ Graphy.renderers = {
       var last_x = -1000;
       var last_width = -1000;
       _.each( labels_to_draw, function(label) {
-        if (label.x > last_x + 40 || label.x < last_x - 40) { // protect against crowding labels - changed from 10 to 40 which fixed label crowding
+        if (label.x > last_x + 50 || label.x < last_x - 50) { // protect against crowding labels - changed from 10 to 50 which fixed label crowding
           Graphy.renderers.axis.label(
             label.text,
             label.x + xOffset,
@@ -708,7 +710,6 @@ Graphy.renderers = {
       // loop through the rows for each unit
       for ( var j = 0; j < (yUnits.length || 1); j++ ) {
         maxLabelWidth = 0;
-        console.log(yUnits[j]);
         for ( var i = 0; i < numberOfLabels; i++ ) {
           h = graphRect.bottom - ( i * ( ( graphRect.bottom - graphRect.top ) / ( numberOfLabels - 1 ) ) );
           roundH = Math.round(h);
