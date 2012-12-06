@@ -37,6 +37,7 @@ var Graphy = {
   // yAxisRenderer: Function or string name of function to render y axis. See Graphy.renderers.axis.
   //                  (default: "cleanY")
   // drawVRule: Boolean to true vertical rules or not if necessary
+  // _hoverLabelRenderer: Function or string name of function to format the hover label.
   //
   //
   createGraph: function(spec) {
@@ -54,6 +55,7 @@ var Graphy = {
         _xAxisInterval,
         _vRuleLabel = false,
         _drawVRule = true,
+        _hoverLabelRenderer,
         _noHover,
         _options = {};
        
@@ -86,6 +88,7 @@ var Graphy = {
       if ( spec.yAxisLabelFormatter ) { self.yAxisLabelFormatter(spec.yAxisLabelFormatter); }
       if ( spec.xAxisRenderer ) { self.xAxisRenderer(spec.xAxisRenderer); }
       if ( spec.yAxisRenderer ) { self.yAxisRenderer(spec.yAxisRenderer); }
+      self.hoverLabelRenderer(spec.hoverLabelRenderer);
       if ( spec.vRuleLabel !== undefined) { self.vRuleLabel(spec.vRuleLabel); }
       if ( spec.drawVRule !== undefined) { self.drawVRule(spec.drawVRule); }
      
@@ -346,16 +349,16 @@ var Graphy = {
               });
             }
 
-            var i, len = groups.length;
+            var i, len = groups.length, absorbThis;
             while( groupsToMove > 0 ) {
               for(i=0; i<len && groupsToMove > 0; i++) {
                 if(groups[i].averageMomentum < 0) {
                   // check above
                   if(i > 0 && groups[i-1].bottom > groups[i].top + groups[i].averageMomentum) {
-                    var absorbThis = groups.splice(--i, 1)[0];
+                    absorbThis = groups.splice(--i, 1)[0];
                     groups[i].moveToAndAbsorb(absorbThis);
-                    len--; 
-                    if(absorbThis.averageMomentum != 0) groupsToMove--;
+                    len--;
+                    if(absorbThis.averageMomentum !== 0) groupsToMove--;
                   } else {
                     groups[i].reachEquilibrium();
                     groupsToMove--;
@@ -363,10 +366,10 @@ var Graphy = {
                 } else if(groups[i].averageMomentum > 0) {
                   // check below
                   if(i < (len-1) && groups[i+1].top < groups[i].bottom + groups[i].averageMomentum) {
-                    var absorbThis = groups.splice(i+1, 1)[0];
+                    absorbThis = groups.splice(i+1, 1)[0];
                     groups[i].moveToAndAbsorb(absorbThis);
                     len--;
-                    if(absorbThis.averageMomentum != 0) groupsToMove--;
+                    if(absorbThis.averageMomentum !== 0) groupsToMove--;
                   } else {
                     groups[i].reachEquilibrium();
                     groupsToMove--;
@@ -388,9 +391,14 @@ var Graphy = {
                 self.lastHighlightAt = now;
                 $.each(groups,function(p,r){
                   $.each(this.items,function(i) {
-                    this.plot.highlightPoint(this.point, r.top+i*labelHeight);
+                    if(self.hoverLabelRenderer()) {
+                      self.hoverLabelRenderer()(this.point, r.top+i*labelHeight, this.plot);
+                    }
+                    else {
+                      this.plot.highlightPoint(this.point, r.top+i*labelHeight, this.plot);
+                    }
                   });
-                })
+                });
               }
             }
 
@@ -481,6 +489,16 @@ var Graphy = {
         _drawVRule = Graphy.util.functionByNameOrFunction( set_drawVRule, Graphy.formatters );
       }
       return _drawVRule;
+    }
+
+    //
+    // accessor
+    //
+    self.hoverLabelRenderer = function( set_hoverLabelRenderer ) {
+      if ( arguments.length ) {
+        _hoverLabelRenderer = set_hoverLabelRenderer;
+      }
+      return _hoverLabelRenderer;
     }
    
     //
@@ -741,15 +759,15 @@ var Graphy = {
             delete this.highlightedPoint;
           }
         },
-        highlightPoint: function(point, topDocumentPixelPosition) {
+        highlightPoint: function(point, topDocumentPixelPosition, p) {
 
           //TODO: need to check if its in the exact perfect position
           // target point is already highlighted, so dont do anything
           //if(this.highlightedPoint && this.highlightedPoint.point == point) return;
 
-          this.removeHighlightPointIfExists();
+          p.removeHighlightPointIfExists();
 
-          var pixel = this.fromPlotPointToDocumentPixel({x:point[0],y:point[1]}),
+          var pixel = p.fromPlotPointToDocumentPixel({x:point[0],y:point[1]}),
             highlightEstimatedHeight = 20,
             defaultTop = pixel.y-highlightEstimatedHeight/2,
             highlightTop = topDocumentPixelPosition;
@@ -769,28 +787,28 @@ var Graphy = {
     	      x_display_point = Math.round(point[0] * 100)/100,
     	      y_display_point = Math.round(point[1] * 100)/100;
     
-          if(this.options.unit) {
-            label = y_display_point + ' ' + this.options.unit + ' @ ' + Graphy.formatters.humanDate(x_display_point);
+          if(p.options.unit) {
+            label = y_display_point + ' ' + p.options.unit + ' @ ' + Graphy.formatters.humanDate(x_display_point);
           } else {
             label = 'x: ' + x_display_point + ', y: ' + y_display_point;
           }
 
-          if(this.options.dataSourceAndTypeLabel){
-            label += " - " + this.options.dataSourceAndTypeLabel;
+          if(p.options.dataSourceAndTypeLabel){
+            label += " - " + p.options.dataSourceAndTypeLabel;
           }
          
-          this.highlightedPoint = {
+          p.highlightedPoint = {
             point: point,
             arrowElement: $c,
             element: $('<div class="graphy_point_label">' + label + '</div>')
-                       .css('background-color', this.options.color || 'gray')
+                       .css('background-color', p.options.color || 'gray')
                        .css('z-index', 1001)
                        .prependTo('body')
                        .addClass('graphy')
           }
          
           // figure out if we need to draw it on the left or not
-          var $gCanvas = $(this.graphy.canvas()),
+          var $gCanvas = $(p.graphy.canvas()),
             gRight = $gCanvas.offset().left + $gCanvas.width(),
             allowedLabelWidth = 250,
             xTransform,
@@ -801,7 +819,7 @@ var Graphy = {
           if(showOnLeft) {
             xTransform = function(x) { return -x + arrowWidth; }
             arrowLeft = pixel.x - arrowWidth;
-            labelLeft = pixel.x - arrowWidth - this.highlightedPoint.element.outerWidth();
+            labelLeft = pixel.x - arrowWidth - p.highlightedPoint.element.outerWidth();
           } else { 
             xTransform = function(x) { return x; }
             arrowLeft = pixel.x;
@@ -824,10 +842,10 @@ var Graphy = {
             cOffsetTop = highlightTop - (labelOffset - arrowHeight/2) + (highlightEstimatedHeight - arrowHeight)/2;
             if(overlapNudge > 0) cOffsetTop -= overlapNudge;
           }
-          ctx.fillStyle = this.options.color || 'gray';
+          ctx.fillStyle = p.options.color || 'gray';
           ctx.fill();
 
-          this.highlightedPoint.element.offset({top: highlightTop, left: labelLeft});
+          p.highlightedPoint.element.offset({top: highlightTop, left: labelLeft});
           $c.prependTo('body').addClass('graphy').offset({left: arrowLeft, top: cOffsetTop});
         }
       }
@@ -2265,10 +2283,11 @@ Graphy.renderers = {
       ctx.restore();
     },
    
-    label: function(val, x, y, graph, styleName, formatter, align, color, opacity) {
+    label: function(val, x, y, graph, styleName, formatter, align, color, opacity, className) {
       var $canvas = graph.$canvas();
       var left = Math.round($canvas.offset().left + x);
       var top = Math.round($canvas.offset().top + y);
+      className = className || "";
      
       // stoopid IE6
       if ( $.browser.msie && $.browser.version.charAt(0) == "6" ) {
@@ -2278,7 +2297,7 @@ Graphy.renderers = {
       if ( formatter ) { val = formatter(val); }
      
       $el = $("<p class='"+styleName+" graphy_axis_label graphy_axis_label_"+graph.index()+"' style='"+ ( color ? 'color:' + color + '; ' : '' ) + ( opacity ? 'opacity:' + opacity + '; ' : '' ) + "'>" + val + "</p>");
-      $el.css({position:'absolute','z-index':1000}).appendTo($canvas.parent()).addClass('graphy');
+      $el.css({position:'absolute','z-index':1000}).appendTo($canvas.parent()).addClass('graphy').addClass(className);
 
       switch ( align ) {
         case "center":
@@ -2312,12 +2331,13 @@ Graphy.renderers = {
         unit = units[unit_i];
        
         if ( unit['color'] && units.length > 1 ) {
-          axis_label += "<font style='color:"+unit['color']+"'>";
+          // The class is added for selection purposes
+          axis_label += "<span style='color:"+unit['color']+"'>";
           open_color_tag = true;
         }
         axis_label += unit['label'];
         if ( open_color_tag ) {
-          axis_label += "</font>";
+          axis_label += "</span>";
           open_color_tag = false;
         }
         if ( unit_i ) { axis_label += "&nbsp;&nbsp;"; }
@@ -2426,7 +2446,7 @@ Graphy.renderers = {
       var last_x = -1000;
       var last_width = -1000;
       _.each( labels_to_draw, function(label) {
-        if (label.x > last_x + 40 || label.x < last_x - 40) { // protect against crowding labels - changed from 10 to 40 which fixed label crowding
+        if (label.x > last_x + 50 || label.x < last_x - 50) { // protect against crowding labels - changed from 10 to 50 which fixed label crowding
           Graphy.renderers.axis.label(
             label.text,
             label.x + xOffset,
@@ -2470,7 +2490,6 @@ Graphy.renderers = {
       // loop through the rows for each unit
       for ( var j = 0; j < (yUnits.length || 1); j++ ) {
         maxLabelWidth = 0;
-        console.log(yUnits[j]);
         for ( var i = 0; i < numberOfLabels; i++ ) {
           h = graphRect.bottom - ( i * ( ( graphRect.bottom - graphRect.top ) / ( numberOfLabels - 1 ) ) );
           roundH = Math.round(h);
