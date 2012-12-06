@@ -24,6 +24,10 @@ You should have received a copy of the Lesser General Public License along with 
   -moz-transform-origin: top left;
   -o-transform: rotate(-90deg);
   -o-transform-origin: top left;
+  -ms-transform: rotate(-90deg);
+  -ms-transform-origin: top left;
+  transform: rotate(-90deg);
+  transform-origin: top left;
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
 }
 
@@ -44,6 +48,7 @@ You should have received a copy of the Lesser General Public License along with 
   white-space: nowrap;
   -moz-border-radius: 2px;
   -webkit-border-radius: 2px;
+  border-radius: 2px;
 }
 
 .graphy_bar_label, .graphy_v_rule_label {
