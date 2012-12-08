@@ -1,15 +1,15 @@
 // Copyright 2010-2012 DECK Monitoring LLC.
 //
 // This file is part of Graphy from DECK Monitoring LLC.
-// 
+//
 // Graphy is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser Public License
-// as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later 
+// as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
 // version.
 //
 // Graphy is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser Public License for more details.
 //
-// You should have received a copy of the Lesser General Public License along with Graphy. If not, see 
+// You should have received a copy of the Lesser General Public License along with Graphy. If not, see
 // <http://www.gnu.org/licenses/>.
 //
 var Graphy = {
@@ -20,7 +20,7 @@ var Graphy = {
  
   //
   // Creates a graph on a canvas element according to a "spec" hash. The hash may contain the following keys:
-  // 
+  //
   // canvas [required]: Selector for a canvas element or any other html element (which will be transformed
   //                    into a canvas). If this contains text, Graphy will assign this text to plot_json in
   //                    the spec.
@@ -31,10 +31,13 @@ var Graphy = {
   //        specific. Example: {"width": 2, "color": "red", "unit": "oxen/m³"}
   // xAxisInterval: Specify a fixed interval. See Graphy.interval.
   // xAxisLabelFormatter: Function or string name of function to format label text. See Graphy.formatters.
+  // yAxisLabelFormatter: Function or string name of function to format label text. See Graphy.formatters.
   // xAxisRenderer: Function or string name of function to render x axis. See Graphy.renderers.axis.
   //                  (default: "cleanX")
   // yAxisRenderer: Function or string name of function to render y axis. See Graphy.renderers.axis.
   //                  (default: "cleanY")
+  // drawVRule: Boolean to true vertical rules or not if necessary
+  // _hoverLabelRenderer: Function or string name of function to format the hover label.
   //
   //
   createGraph: function(spec) {
@@ -45,17 +48,20 @@ var Graphy = {
    
     // have read/write accessors
     var _canvas,
-        _yAxisRenderer, 
-        _xAxisRenderer, 
-        _xAxisLabelFormatter, 
+        _yAxisRenderer,
+        _xAxisRenderer,
+        _yAxisLabelFormatter,
+        _xAxisLabelFormatter,
         _xAxisInterval,
-		    _vRuleLabel = false,
+        _vRuleLabel = false,
+        _drawVRule = true,
+        _hoverLabelRenderer,
         _noHover,
         _options = {};
        
     // have read-only accessors
     var _$canvas,
-        _ctx, 
+        _ctx,
         _index = Graphy.graphs.push(self) - 1,
         _valueRect = false,
         _graphRect = false,
@@ -70,7 +76,7 @@ var Graphy = {
         _hoverLineCtx;
    
     //
-    // gets the canvas and context and calls any spec'd functions 
+    // gets the canvas and context and calls any spec'd functions
     //
     var init = function(spec) {
       if ( spec.options ) { self.options(spec.options); }
@@ -79,9 +85,12 @@ var Graphy = {
      
       if ( spec.xAxisInterval ) { self.xAxisInterval(spec.xAxisInterval); }
       if ( spec.xAxisLabelFormatter ) { self.xAxisLabelFormatter(spec.xAxisLabelFormatter); }
+      if ( spec.yAxisLabelFormatter ) { self.yAxisLabelFormatter(spec.yAxisLabelFormatter); }
       if ( spec.xAxisRenderer ) { self.xAxisRenderer(spec.xAxisRenderer); }
       if ( spec.yAxisRenderer ) { self.yAxisRenderer(spec.yAxisRenderer); }
-      if ( spec.vRuleLabel ) { self.vRuleLabel(spec.vRuleLabel); }
+      self.hoverLabelRenderer(spec.hoverLabelRenderer);
+      if ( spec.vRuleLabel !== undefined) { self.vRuleLabel(spec.vRuleLabel); }
+      if ( spec.drawVRule !== undefined) { self.drawVRule(spec.drawVRule); }
      
       if ( spec['plot'] ) { self.plot(spec['plot']); }
       if ( spec['plots'] ) { self.plots(spec['plots']); }
@@ -108,8 +117,8 @@ var Graphy = {
     // draws it up if the css is all ready. if not, it waits until it can see it.
     //
     self.draw = function () {
-      if ( Graphy.cssIsReady ) { 
-        drawForReal(); 
+      if ( Graphy.cssIsReady ) {
+        drawForReal();
       } else {
         var $test = $("<div class='graphy_css_loaded' style='display:hidden;'></div>");
         $('body').append($test);
@@ -149,12 +158,12 @@ var Graphy = {
       _ctx.clearRect(0, 0, _canvas.width, _canvas.height);
       $(".graphy_axis_label_" + _index).remove();
 
-      if (_plots.length > 0) {        
+      if (_plots.length > 0) {
         // draw the axis (order is important here)
         if ( !_yAxisRenderer ) { _yAxisRenderer = Graphy.renderers.axis.cleanY; }
         if ( !_xAxisRenderer ) { _xAxisRenderer = Graphy.renderers.axis.cleanX; }
         _yAxisRenderer( "measure", self );
-        _xAxisRenderer( "measure", self );        
+        _xAxisRenderer( "measure", self );
         _yAxisRenderer( "draw", self );
         _xAxisRenderer( "draw", self );
        
@@ -163,7 +172,7 @@ var Graphy = {
           indexByPlot = {};
         $.map(_plots, function(el,i) { indexByPlot[el] = i; });
 
-        _plots = _plots.sort(function(a,b){ 
+        _plots = _plots.sort(function(a,b){
           // both bars or neither bars
           if((a.options.renderer == 'bar') == (b.options.renderer == 'bar'))
             return indexByPlot[a] - indexByPlot[b];
@@ -176,10 +185,10 @@ var Graphy = {
         for (var i = 0; i < _plots.length; i++) {
           options = $.extend({}, _options, _plots[i].options);
           renderer = Graphy.util.functionByNameOrFunction(options.renderer, Graphy.renderers, Graphy.renderers.plot);
-          if (rendererIndexes[renderer] == undefined) rendererIndexes[renderer] = 0;
+          if (rendererIndexes[renderer] === undefined) rendererIndexes[renderer] = 0;
           rendererIndexes[renderer] += 1;
-          renderer(rendererIndexes[renderer], _plots[i].data, options, self);          
-        }      
+          renderer(rendererIndexes[renderer], _plots[i].data, options, self);
+        }
       }
      
       _ctx.restore();
@@ -200,7 +209,7 @@ var Graphy = {
         if(!$target.is('canvas')){
           _$canvas = $target.createCanvas().find('canvas');
         } else {
-          // For non-dynamically created canvas elements, we need to 
+          // For non-dynamically created canvas elements, we need to
           // do some magic for IE 7 & 8 to make them usable with excanvas.
           if (typeof(G_vmlCanvasManager) != 'undefined'){
             G_vmlCanvasManager.initElement(_$canvas.get(0));
@@ -340,16 +349,16 @@ var Graphy = {
               });
             }
 
-            var i, len = groups.length;
+            var i, len = groups.length, absorbThis;
             while( groupsToMove > 0 ) {
               for(i=0; i<len && groupsToMove > 0; i++) {
                 if(groups[i].averageMomentum < 0) {
                   // check above
                   if(i > 0 && groups[i-1].bottom > groups[i].top + groups[i].averageMomentum) {
-                    var absorbThis = groups.splice(--i, 1)[0];
+                    absorbThis = groups.splice(--i, 1)[0];
                     groups[i].moveToAndAbsorb(absorbThis);
-                    len--; 
-                    if(absorbThis.averageMomentum != 0) groupsToMove--;
+                    len--;
+                    if(absorbThis.averageMomentum !== 0) groupsToMove--;
                   } else {
                     groups[i].reachEquilibrium();
                     groupsToMove--;
@@ -357,10 +366,10 @@ var Graphy = {
                 } else if(groups[i].averageMomentum > 0) {
                   // check below
                   if(i < (len-1) && groups[i+1].top < groups[i].bottom + groups[i].averageMomentum) {
-                    var absorbThis = groups.splice(i+1, 1)[0];
+                    absorbThis = groups.splice(i+1, 1)[0];
                     groups[i].moveToAndAbsorb(absorbThis);
                     len--;
-                    if(absorbThis.averageMomentum != 0) groupsToMove--;
+                    if(absorbThis.averageMomentum !== 0) groupsToMove--;
                   } else {
                     groups[i].reachEquilibrium();
                     groupsToMove--;
@@ -382,9 +391,14 @@ var Graphy = {
                 self.lastHighlightAt = now;
                 $.each(groups,function(p,r){
                   $.each(this.items,function(i) {
-                    this.plot.highlightPoint(this.point, r.top+i*labelHeight);
+                    if(self.hoverLabelRenderer()) {
+                      self.hoverLabelRenderer()(this.point, r.top+i*labelHeight, this.plot);
+                    }
+                    else {
+                      this.plot.highlightPoint(this.point, r.top+i*labelHeight, this.plot);
+                    }
                   });
-                })
+                });
               }
             }
 
@@ -426,10 +440,20 @@ var Graphy = {
     // accessor
     //
     self.xAxisLabelFormatter = function( set_xAxisLabelFormatter ) {
-      if ( arguments.length ) { 
-        _xAxisLabelFormatter = Graphy.util.functionByNameOrFunction( set_xAxisLabelFormatter, Graphy.formatters ); 
+      if ( arguments.length ) {
+        _xAxisLabelFormatter = Graphy.util.functionByNameOrFunction( set_xAxisLabelFormatter, Graphy.formatters );
       }
       return _xAxisLabelFormatter;
+    }
+
+    //
+    // accessor
+    //
+    self.yAxisLabelFormatter = function( set_yAxisLabelFormatter ) {
+      if ( arguments.length ) {
+        _yAxisLabelFormatter = Graphy.util.functionByNameOrFunction( set_yAxisLabelFormatter, Graphy.formatters );
+      }
+      return _yAxisLabelFormatter;
     }
    
     //
@@ -437,7 +461,7 @@ var Graphy = {
     //
     self.xAxisRenderer = function( set_xAxisRenderer ) {
       if ( arguments.length ) {
-        _xAxisRenderer = Graphy.util.functionByNameOrFunction( set_xAxisRenderer, Graphy.renderers.axis ); 
+        _xAxisRenderer = Graphy.util.functionByNameOrFunction( set_xAxisRenderer, Graphy.renderers.axis );
       }
       return _xAxisRenderer;
     }
@@ -458,6 +482,23 @@ var Graphy = {
     self.vRuleLabel = function( set_vRuleLabel ) {
       if ( arguments.length ) { _vRuleLabel = set_vRuleLabel; }
       return _vRuleLabel;
+    }
+
+    self.drawVRule = function( set_drawVRule ) {
+      if ( arguments.length ) {
+        _drawVRule = Graphy.util.functionByNameOrFunction( set_drawVRule, Graphy.formatters );
+      }
+      return _drawVRule;
+    }
+
+    //
+    // accessor
+    //
+    self.hoverLabelRenderer = function( set_hoverLabelRenderer ) {
+      if ( arguments.length ) {
+        _hoverLabelRenderer = set_hoverLabelRenderer;
+      }
+      return _hoverLabelRenderer;
     }
    
     //
@@ -623,7 +664,7 @@ var Graphy = {
        
         var yUnitOption = options['unit'] || options['yUnit'];
         if ( yUnitOption ) {
-          if ( !_valueRectByUnit[yUnitOption] ) { 
+          if ( !_valueRectByUnit[yUnitOption] ) {
             _valueRectByUnit[yUnitOption] = Graphy.util.createRect( {left: dp[0], right: dp[0], bottom: dp[1], top: dp[1]} );
             _yUnits.push( {"label": yUnitOption, "color": options['color']} );
           } else {
@@ -632,7 +673,7 @@ var Graphy = {
         }
        
         if ( options['xUnit'] ) {
-          if ( !_valueRectByUnit[options['xUnit']] ) { 
+          if ( !_valueRectByUnit[options['xUnit']] ) {
             _valueRectByUnit[options['xUnit']] = Graphy.util.createRect( {left: dp[0], right: dp[0], bottom: dp[1], top: dp[1]} );
             _xUnits.push( {"label": options['xUnit'], "color": options['color']} );
           } else {
@@ -664,19 +705,19 @@ var Graphy = {
       p.remove = function() { return self.removePlot(p); };
       p.select = function() { 
         if ( !p.options['selected'] ) {
-          p.options['selected'] = true; 
+          p.options['selected'] = true;
           selectedPlotCount++;
         }
-        self.draw(); 
-        return p; 
+        self.draw();
+        return p;
       };
-      p.unselect = p.deselect = function() { 
+      p.unselect = p.deselect = function() {
         if ( p.options['selected'] ) {
-          p.options['selected'] = false; 
+          p.options['selected'] = false;
           selectedPlotCount--;
         }
-        self.draw(); 
-        return p; 
+        self.draw();
+        return p;
       };
 
       // only enable hover if a non-bar graph has been added.  hover is disabled when the graph is cleared and this is where it eventually gets enabled.
@@ -718,15 +759,15 @@ var Graphy = {
             delete this.highlightedPoint;
           }
         },
-        highlightPoint: function(point, topDocumentPixelPosition) {
+        highlightPoint: function(point, topDocumentPixelPosition, p) {
 
           //TODO: need to check if its in the exact perfect position
           // target point is already highlighted, so dont do anything
           //if(this.highlightedPoint && this.highlightedPoint.point == point) return;
 
-          this.removeHighlightPointIfExists();
+          p.removeHighlightPointIfExists();
 
-          var pixel = this.fromPlotPointToDocumentPixel({x:point[0],y:point[1]}),
+          var pixel = p.fromPlotPointToDocumentPixel({x:point[0],y:point[1]}),
             highlightEstimatedHeight = 20,
             defaultTop = pixel.y-highlightEstimatedHeight/2,
             highlightTop = topDocumentPixelPosition;
@@ -746,28 +787,28 @@ var Graphy = {
     	      x_display_point = Math.round(point[0] * 100)/100,
     	      y_display_point = Math.round(point[1] * 100)/100;
     
-          if(this.options.unit) {
-            label = y_display_point + ' ' + this.options.unit + ' @ ' + Graphy.formatters.humanDate(x_display_point);
+          if(p.options.unit) {
+            label = y_display_point + ' ' + p.options.unit + ' @ ' + Graphy.formatters.humanDate(x_display_point);
           } else {
             label = 'x: ' + x_display_point + ', y: ' + y_display_point;
           }
 
-          if(this.options.dataSourceAndTypeLabel){
-            label += " - " + this.options.dataSourceAndTypeLabel;
+          if(p.options.dataSourceAndTypeLabel){
+            label += " - " + p.options.dataSourceAndTypeLabel;
           }
          
-          this.highlightedPoint = {
+          p.highlightedPoint = {
             point: point,
             arrowElement: $c,
             element: $('<div class="graphy_point_label">' + label + '</div>')
-                       .css('background-color', this.options.color || 'gray')
+                       .css('background-color', p.options.color || 'gray')
                        .css('z-index', 1001)
                        .prependTo('body')
                        .addClass('graphy')
           }
          
           // figure out if we need to draw it on the left or not
-          var $gCanvas = $(this.graphy.canvas()),
+          var $gCanvas = $(p.graphy.canvas()),
             gRight = $gCanvas.offset().left + $gCanvas.width(),
             allowedLabelWidth = 250,
             xTransform,
@@ -778,7 +819,7 @@ var Graphy = {
           if(showOnLeft) {
             xTransform = function(x) { return -x + arrowWidth; }
             arrowLeft = pixel.x - arrowWidth;
-            labelLeft = pixel.x - arrowWidth - this.highlightedPoint.element.outerWidth();
+            labelLeft = pixel.x - arrowWidth - p.highlightedPoint.element.outerWidth();
           } else { 
             xTransform = function(x) { return x; }
             arrowLeft = pixel.x;
@@ -801,10 +842,10 @@ var Graphy = {
             cOffsetTop = highlightTop - (labelOffset - arrowHeight/2) + (highlightEstimatedHeight - arrowHeight)/2;
             if(overlapNudge > 0) cOffsetTop -= overlapNudge;
           }
-          ctx.fillStyle = this.options.color || 'gray';
+          ctx.fillStyle = p.options.color || 'gray';
           ctx.fill();
 
-          this.highlightedPoint.element.offset({top: highlightTop, left: labelLeft});
+          p.highlightedPoint.element.offset({top: highlightTop, left: labelLeft});
           $c.prependTo('body').addClass('graphy').offset({left: arrowLeft, top: cOffsetTop});
         }
       }
