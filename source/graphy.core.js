@@ -788,7 +788,10 @@ var Graphy = {
     	      y_display_point = Math.round(point[1] * 100)/100;
     
           if(p.options.unit) {
-            label = y_display_point + ' ' + p.options.unit + ' @ ' + Graphy.formatters.humanDate(x_display_point);
+            var interval = _xAxisInterval;
+            var timePreposition = Graphy.formatters.setTimePreposition(x_display_point, interval);
+
+            label = y_display_point + ' ' + p.options.unit + ' ' + timePreposition + ' ' + Graphy.formatters.humanDate(x_display_point, interval);
           } else {
             label = 'x: ' + x_display_point + ', y: ' + y_display_point;
           }

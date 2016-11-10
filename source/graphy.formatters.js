@@ -13,6 +13,22 @@
 // <http://www.gnu.org/licenses/>.
 //
 Graphy.formatters = {
+
+  setTimePreposition: function(val, precision) {
+    var date = new Date(val);
+    precision = precision || 1;
+
+    if ( isNaN( date.getTime() ) ) {
+      val = "";
+    } else if ( precision < Graphy.interval.month && date.getHours() || date.getMinutes() || date.getSeconds() ) {
+      val = "@";
+    } else if ( precision < Graphy.interval.month && date.getDate() ) {
+      val = "on";
+    } else {
+      val = "in";
+    }
+    return val;
+  },
  
   humanDate: function(val, precision) {
     var date = new Date(val);
