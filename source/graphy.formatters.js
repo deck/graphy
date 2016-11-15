@@ -20,7 +20,7 @@ Graphy.formatters = {
 
     if ( isNaN( date.getTime() ) ) {
       val = "";
-    } else if ( precision < Graphy.interval.month && date.getHours() || date.getMinutes() || date.getSeconds() ) {
+    } else if ( precision < Graphy.interval.month && ( date.getHours() || date.getMinutes() || date.getSeconds() ) ) {
       val = "@";
     } else if ( precision < Graphy.interval.month && date.getDate() ) {
       val = "on";
@@ -38,7 +38,7 @@ Graphy.formatters = {
       val = "";
     } else if ( precision < Graphy.interval.month && date.getHours() == 12 && date.getMinutes() === 0 ) {
       val = "noon";
-    } else if ( precision < Graphy.interval.month && date.getHours() || date.getMinutes() || date.getSeconds()  ) {
+    } else if ( precision < Graphy.interval.month && ( date.getHours() || date.getMinutes() || date.getSeconds() ) ) {
       var suffix = "am";
       var hours = date.getHours();
       if ( hours >= 12 ) {
