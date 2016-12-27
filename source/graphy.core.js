@@ -784,8 +784,8 @@ var Graphy = {
 
           // set up the label and build it
           var label,
-    	      x_display_point = Math.round(point[0] * 100)/100,
-    	      y_display_point = Math.round(point[1] * 100)/100;
+    	      x_display_point = Math.round(point[0] * 100000)/100000,
+    	      y_display_point = Math.round(point[1] * 100000)/100000;
     
           if(p.options.unit) {
             label = y_display_point + ' ' + p.options.unit + ' @ ' + Graphy.formatters.humanDate(x_display_point);
