@@ -2039,7 +2039,7 @@ Graphy.renderers = {
      
       if ( action == "measure" ) {
         graphRect.bottom = $canvas.height() - 24 - ( graph.xUnits().length ? 20 : 0 );
-        graphRect.right = $canvas.width() - 14;
+        graphRect.right = $canvas.width();
       } else {
         var numberOfLabels = Math.max( Math.floor( ( graphRect.right - graphRect.left ) / 72 ) + 1, 2 );
         Graphy.renderers.axis.xValueLabels( numberOfLabels, 0, graphRect.bottom + 10, "graphy_axis_line_x_value_label", "center", graph );
@@ -2062,7 +2062,7 @@ Graphy.renderers = {
      
       if ( action == "measure" ) {
         graphRect.bottom = $canvas.height() - 24 - ( graph.xUnits().length ? 20 : 0 );
-        graphRect.right = $canvas.width() - 14;
+        graphRect.right = $canvas.width();
       } else {
         ctx.save();
      
