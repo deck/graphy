@@ -259,6 +259,10 @@ var Graphy = {
 
             var toHighlight = []; // array of objects with a plot and point property
             $.each(_plots, function() {
+              // Allows you to turn hover on and off for specific lines
+              if(this.options.hover === false) {
+                return;
+              }
               var plotPoint = this.fromDocumentPixelToPlotPoint({x: e.pageX, y:e.pageY});
 
               // values are in-order along x-axis in this.data, so find closest point to cursor with simple binary search
