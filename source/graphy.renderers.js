@@ -700,7 +700,7 @@ Graphy.renderers = {
       var _yLabel = function(valueRect, x, color) {
         precision = Graphy.util.calculatePrecision(valueRect.bottom, valueRect.top);
 
-        val = Math.round( Graphy.util.applyValueToNewRatio( h, graphRect.bottom, graphRect.top, valueRect.bottom, valueRect.top ) * 100 ) / 100;
+        val = Math.round( Graphy.util.applyValueToNewRatio( h, graphRect.bottom, graphRect.top, valueRect.bottom, valueRect.top ) * 100000 ) / 100000;
 
         precise = val.toPrecision(precision);
 
